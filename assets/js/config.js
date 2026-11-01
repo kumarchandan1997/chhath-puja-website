@@ -7,3 +7,6 @@
 window.SUPABASE_URL = "https://hxtiqcqjjwjbumxsepqv.supabase.co";
 window.SUPABASE_ANON_KEY = "sb_publishable_8ndS0_c2ZvjJYRrILWO1zA_ojlmfgiJ";
 window.STORAGE_BUCKET = "donor-images";
+
+window.INSTAGRAM_URL = "";
+window.WHATSAPP_URL = "";
