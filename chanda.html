@@ -391,6 +391,170 @@
                 width: 100%;
             }
         }
+
+        /* Donor photo gallery/camera controls */
+        .donor-photo-field {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .donor-photo-label {
+            margin-bottom: 8px;
+            color: #4b2e20;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .donor-photo-description {
+            margin: 0 0 14px;
+            color: #78716c;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .donor-photo-options {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .donor-photo-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-width: 0;
+            min-height: 135px;
+            padding: 18px 12px;
+            border: 2px dashed #e7b65c;
+            border-radius: 13px;
+            background: #fffaf0;
+            text-align: center;
+            cursor: pointer;
+            transition: background .2s ease, border-color .2s ease, transform .2s ease;
+        }
+
+        .donor-photo-option:hover,
+        .donor-photo-option:focus-within {
+            background: #fff0cc;
+            border-color: #c77716;
+        }
+
+        .donor-photo-option:active {
+            transform: scale(.98);
+        }
+
+        .donor-photo-option-icon {
+            font-size: 30px;
+            line-height: 1.2;
+        }
+
+        .donor-photo-option-title {
+            color: #7c2d12;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.5;
+        }
+
+        .donor-photo-option-description {
+            color: #786b60;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        .donor-photo-preview {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 16px;
+            padding: 13px;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            background: #f0fdf4;
+        }
+
+        .donor-photo-preview[hidden] {
+            display: none;
+        }
+
+        .donor-photo-preview img {
+            display: block;
+            width: 76px;
+            height: 76px;
+            flex: 0 0 76px;
+            object-fit: cover;
+            border-radius: 9px;
+            background: #e5e7eb;
+        }
+
+        .donor-photo-preview-details {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .donor-photo-preview-details strong {
+            max-width: 100%;
+            color: #166534;
+            font-size: 13px;
+            overflow-wrap: anywhere;
+        }
+
+        .donor-photo-preview-details span {
+            color: #4b6353;
+            font-size: 12px;
+        }
+
+        .donor-photo-remove {
+            padding: 4px 0;
+            border: 0;
+            background: transparent;
+            color: #b91c1c;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .donor-photo-remove:hover {
+            text-decoration: underline;
+        }
+
+        .donor-photo-help {
+            display: block;
+            margin-top: 11px;
+            color: #78716c;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 600px) {
+            .donor-photo-options {
+                grid-template-columns: 1fr;
+                gap: 11px;
+            }
+
+            .donor-photo-option {
+                min-height: 112px;
+                padding: 15px 12px;
+            }
+
+            .donor-photo-preview {
+                align-items: flex-start;
+                gap: 11px;
+                padding: 11px;
+            }
+
+            .donor-photo-preview img {
+                width: 64px;
+                height: 64px;
+                flex-basis: 64px;
+            }
+        }
+
     </style>
 </head>
 
@@ -597,14 +761,78 @@
                         placeholder="जैसे: 1100">
                 </label>
 
-                <label>
-                    दानदाता की फोटो
+                <!-- Donor photo: gallery and camera options -->
+                <div class="full donor-photo-field">
+
+                    <div class="donor-photo-label">
+                        दानदाता की फोटो
+                    </div>
+
+                    <p class="donor-photo-description">
+                        गैलरी से फोटो चुनें या मोबाइल कैमरे से नई फोटो लें।
+                    </p>
+
+                    <div class="donor-photo-options">
+
+                        <label for="donor-gallery-image" class="donor-photo-option">
+                            <span class="donor-photo-option-icon" aria-hidden="true">📁</span>
+                            <span class="donor-photo-option-title">गैलरी से फोटो चुनें</span>
+                            <span class="donor-photo-option-description">मोबाइल या कंप्यूटर से</span>
+                        </label>
+
+                        <input
+                            id="donor-gallery-image"
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/gif"
+                            hidden>
+
+                        <label for="donor-camera-image" class="donor-photo-option">
+                            <span class="donor-photo-option-icon" aria-hidden="true">📸</span>
+                            <span class="donor-photo-option-title">कैमरे से फोटो लें</span>
+                            <span class="donor-photo-option-description">कैमरा खोलकर फोटो खींचें</span>
+                        </label>
+
+                        <input
+                            id="donor-camera-image"
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            hidden>
+
+                    </div>
+
+                    <div id="donor-photo-preview" class="donor-photo-preview" hidden>
+                        <img
+                            id="donor-photo-preview-image"
+                            src=""
+                            alt="दानदाता की चुनी गई फोटो">
+
+                        <div class="donor-photo-preview-details">
+                            <strong id="donor-photo-file-name">चुनी गई फोटो</strong>
+                            <span id="donor-photo-file-size"></span>
+
+                            <button
+                                id="remove-donor-photo"
+                                type="button"
+                                class="donor-photo-remove">
+                                ✕ फोटो हटाएँ
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Keep the original field name so existing chanda.js can read it -->
                     <input
+                        id="donor-image"
                         name="image"
                         type="file"
-                        accept="image/jpeg,image/png,image/webp,image/gif">
-                    <small>अधिकतम 5 MB की फोटो चुनें।</small>
-                </label>
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        hidden>
+
+                    <small class="donor-photo-help">
+                        अधिकतम 5 MB। JPG, PNG, WEBP और GIF फॉर्मेट स्वीकार किए जाएँगे।
+                    </small>
+
+                </div>
 
                 <label class="full">
                     टिप्पणी / रिमार्क
@@ -659,6 +887,124 @@
     </footer>
 
     <div id="toast" class="toast" role="status"></div>
+
+
+    <!-- Gallery/camera photo picker. The selected file is copied into the existing
+         name="image" input so the existing assets/js/chanda.js can submit it. -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const galleryInput = document.getElementById("donor-gallery-image");
+        const cameraInput = document.getElementById("donor-camera-image");
+        const actualInput = document.getElementById("donor-image");
+        const previewContainer = document.getElementById("donor-photo-preview");
+        const previewImage = document.getElementById("donor-photo-preview-image");
+        const fileName = document.getElementById("donor-photo-file-name");
+        const fileSize = document.getElementById("donor-photo-file-size");
+        const removeButton = document.getElementById("remove-donor-photo");
+        const messageElement = document.getElementById("donation-form-message");
+
+        const MAX_SIZE = 5 * 1024 * 1024;
+        const ALLOWED_TYPES = [
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/gif"
+        ];
+
+        let previewUrl = null;
+
+        function showMessage(message) {
+            if (messageElement) {
+                messageElement.textContent = message;
+                messageElement.className = "donation-error";
+                messageElement.setAttribute("role", "alert");
+            } else {
+                alert(message);
+            }
+        }
+
+        function clearMessage() {
+            if (messageElement) {
+                messageElement.textContent = "";
+                messageElement.className = "";
+                messageElement.setAttribute("role", "status");
+            }
+        }
+
+        function clearPreview() {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+                previewUrl = null;
+            }
+
+            previewImage.removeAttribute("src");
+            previewContainer.hidden = true;
+            fileName.textContent = "";
+            fileSize.textContent = "";
+        }
+
+        function clearSelectedFile() {
+            actualInput.value = "";
+            galleryInput.value = "";
+            cameraInput.value = "";
+            clearPreview();
+        }
+
+        function handleSelectedFile(file) {
+            if (!file) return;
+
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                clearSelectedFile();
+                showMessage("कृपया JPG, PNG, WEBP या GIF फॉर्मेट की फोटो चुनें।");
+                return;
+            }
+
+            if (file.size > MAX_SIZE) {
+                clearSelectedFile();
+                showMessage("फोटो का आकार 5 MB से कम होना चाहिए।");
+                return;
+            }
+
+            try {
+                const transfer = new DataTransfer();
+                transfer.items.add(file);
+                actualInput.files = transfer.files;
+            } catch (error) {
+                clearSelectedFile();
+                showMessage("फोटो चुनने में समस्या हुई। कृपया दोबारा कोशिश करें।");
+                return;
+            }
+
+            clearPreview();
+            previewUrl = URL.createObjectURL(file);
+            previewImage.src = previewUrl;
+            fileName.textContent = file.name || "कैमरे से ली गई फोटो";
+            fileSize.textContent = (file.size / (1024 * 1024)).toFixed(2) + " MB";
+            previewContainer.hidden = false;
+            clearMessage();
+        }
+
+        galleryInput.addEventListener("change", function () {
+            handleSelectedFile(galleryInput.files && galleryInput.files[0]);
+        });
+
+        cameraInput.addEventListener("change", function () {
+            handleSelectedFile(cameraInput.files && cameraInput.files[0]);
+        });
+
+        removeButton.addEventListener("click", function () {
+            clearSelectedFile();
+            clearMessage();
+        });
+
+        // Helpful for custom submit code, while preserving the original input name="image".
+        window.getDonorPhotoFile = function () {
+            return actualInput.files && actualInput.files[0]
+                ? actualInput.files[0]
+                : null;
+        };
+    });
+    </script>
 
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

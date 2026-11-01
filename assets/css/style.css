@@ -2127,3 +2127,432 @@ td {
         animation-iteration-count: 1 !important;
     }
 }
+
+
+/* =========================================
+   CHANDA FINANCIAL SUMMARY SECTION
+========================================= */
+
+.chanda-finance-section {
+    padding: 75px 20px;
+    background: linear-gradient(
+        180deg,
+        #fffaf0 0%,
+        #fff3d6 100%
+    );
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.chanda-finance-section *,
+.chanda-finance-section *::before,
+.chanda-finance-section *::after {
+    box-sizing: border-box;
+}
+
+
+/* Main Container */
+
+.chanda-finance-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+
+/* =========================================
+   SECTION HEADER
+========================================= */
+
+.chanda-finance-header {
+    text-align: center;
+    margin-bottom: 45px;
+}
+
+.chanda-finance-eyebrow {
+    display: inline-block;
+    padding: 9px 18px;
+    margin-bottom: 16px;
+
+    background: #fff0c2;
+    border: 1px solid #f0d28a;
+    border-radius: 50px;
+
+    color: #8b4513;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.chanda-finance-header h2 {
+    margin: 0 0 12px;
+
+    color: #7c2d12;
+    font-size: clamp(26px, 4vw, 38px);
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.chanda-finance-header > p {
+    margin: 0;
+
+    color: #854d0e;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.chanda-finance-divider {
+    width: 90px;
+    height: 4px;
+
+    margin: 20px auto;
+
+    background: linear-gradient(
+        90deg,
+        #f59e0b,
+        #dc2626
+    );
+
+    border-radius: 10px;
+}
+
+.chanda-finance-subtitle {
+    display: block;
+
+    color: #78634d;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+
+/* =========================================
+   FINANCIAL CARDS GRID
+========================================= */
+
+.chanda-finance-grid {
+    display: grid;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 24px;
+}
+
+
+/* Individual Card */
+
+.chanda-finance-card {
+    position: relative;
+
+    min-width: 0;
+    padding: 26px 24px;
+
+    background: #ffffff;
+
+    border: 1px solid #f1e6d0;
+    border-radius: 18px;
+
+    box-shadow: 0 8px 25px rgba(120, 53, 15, 0.07);
+
+    overflow: hidden;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+
+/* Top Decorative Border */
+
+.chanda-finance-card::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 5px;
+
+    background: var(--finance-accent, #d97706);
+}
+
+.chanda-finance-card:hover {
+    transform: translateY(-5px);
+
+    box-shadow: 0 14px 32px rgba(120, 53, 15, 0.13);
+}
+
+
+/* Card Top */
+
+.chanda-finance-card-top {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+
+/* Card Icon */
+
+.chanda-finance-icon {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 54px;
+    height: 54px;
+
+    flex-shrink: 0;
+
+    background: var(--finance-light, #fff7ed);
+
+    border-radius: 15px;
+
+    font-size: 27px;
+}
+
+
+/* Card Badge */
+
+.chanda-finance-badge {
+    display: inline-block;
+
+    padding: 6px 11px;
+
+    background: var(--finance-light, #fff7ed);
+
+    color: var(--finance-accent, #9a3412);
+
+    border-radius: 30px;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* Card Heading */
+
+.chanda-finance-card h3 {
+    margin: 0 0 12px;
+
+    color: #4b2e20;
+
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.6;
+}
+
+
+/* Amount */
+
+.chanda-finance-amount {
+    margin-bottom: 12px;
+
+    color: var(--finance-accent, #9a3412);
+
+    font-size: clamp(25px, 2.5vw, 32px);
+    font-weight: 800;
+
+    line-height: 1.35;
+
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* Card Description */
+
+.chanda-finance-card > p {
+    margin: 0;
+
+    color: #786b60;
+
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+
+/* =========================================
+   INDIVIDUAL CARD COLORS
+========================================= */
+
+.donation-card {
+    --finance-accent: #15803d;
+    --finance-light: #dcfce7;
+}
+
+.expense-card {
+    --finance-accent: #c2410c;
+    --finance-light: #ffedd5;
+}
+
+.advance-card {
+    --finance-accent: #1d4ed8;
+    --finance-light: #dbeafe;
+}
+
+.pending-card {
+    --finance-accent: #b91c1c;
+    --finance-light: #fee2e2;
+}
+
+.balance-card {
+    --finance-accent: #0f766e;
+    --finance-light: #ccfbf1;
+}
+
+.remaining-card {
+    --finance-accent: #7e22ce;
+    --finance-light: #f3e8ff;
+}
+
+
+/* =========================================
+   FINANCIAL NOTE
+========================================= */
+
+.chanda-finance-note {
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 16px;
+
+    margin-top: 32px;
+    padding: 22px 24px;
+
+    background: rgba(255, 255, 255, 0.8);
+
+    border: 1px solid #f0dfbb;
+    border-left: 5px solid #d97706;
+
+    border-radius: 12px;
+}
+
+.chanda-finance-note-icon {
+    flex-shrink: 0;
+
+    font-size: 25px;
+}
+
+.chanda-finance-note h4 {
+    margin: 0 0 8px;
+
+    color: #7c2d12;
+
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.chanda-finance-note p {
+    margin: 0;
+
+    color: #665548;
+
+    font-size: 14px;
+    line-height: 1.9;
+}
+
+
+/* =========================================
+   TABLET RESPONSIVE
+========================================= */
+
+@media (max-width: 992px) {
+
+    .chanda-finance-section {
+        padding: 60px 18px;
+    }
+
+    .chanda-finance-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .chanda-finance-card {
+        padding: 23px 20px;
+    }
+
+}
+
+
+/* =========================================
+   MOBILE RESPONSIVE
+========================================= */
+
+@media (max-width: 576px) {
+
+    .chanda-finance-section {
+        padding: 45px 14px;
+    }
+
+    .chanda-finance-header {
+        margin-bottom: 30px;
+    }
+
+    .chanda-finance-header h2 {
+        font-size: 26px;
+    }
+
+    .chanda-finance-header > p {
+        font-size: 15px;
+        line-height: 1.8;
+    }
+
+    .chanda-finance-subtitle {
+        font-size: 13px;
+    }
+
+    .chanda-finance-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .chanda-finance-card {
+        padding: 23px 20px;
+        border-radius: 15px;
+    }
+
+    .chanda-finance-card-top {
+        margin-bottom: 18px;
+    }
+
+    .chanda-finance-icon {
+        width: 48px;
+        height: 48px;
+
+        font-size: 24px;
+    }
+
+    .chanda-finance-card h3 {
+        font-size: 17px;
+    }
+
+    .chanda-finance-amount {
+        font-size: 29px;
+    }
+
+    .chanda-finance-card > p {
+        font-size: 13px;
+    }
+
+    .chanda-finance-note {
+        gap: 12px;
+
+        margin-top: 22px;
+        padding: 18px 15px;
+    }
+
+    .chanda-finance-note h4 {
+        font-size: 15px;
+    }
+
+    .chanda-finance-note p {
+        font-size: 13px;
+    }
+
+}

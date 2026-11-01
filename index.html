@@ -1,295 +1,201 @@
-
 <!doctype html>
 <html lang="hi">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#9a3412">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#9a3412" />
 
     <title>छठ पूजा समिति | मुख्य पृष्ठ</title>
 
-    <link rel="stylesheet" href="assets/css/style.css">
-</head>
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
 
-<body>
-
+  <body>
     <!-- =========================
          HEADER / NAVBAR
     ========================== -->
 
     <header class="site-header">
+      <div class="container nav-wrap">
+        <a class="brand" href="index.html">
+          <span class="brand-icon">☀</span>
 
-        <div class="container nav-wrap">
+          <span>
+            <strong>छठ पूजा समिति</strong>
+            <small>आस्था • सेवा • सहयोग</small>
+          </span>
+        </a>
 
-            <a class="brand" href="index.html">
+        <button
+          class="menu-toggle"
+          type="button"
+          aria-label="मेन्यू खोलें"
+          aria-expanded="false"
+        >
+          ☰
+        </button>
 
-                <span class="brand-icon">☀</span>
+        <nav class="nav-links" aria-label="मुख्य नेविगेशन">
+          <a class="active" href="index.html"> मुख्य पृष्ठ </a>
 
-                <span>
-                    <strong>छठ पूजा समिति</strong>
-                    <small>आस्था • सेवा • सहयोग</small>
-                </span>
+          <a href="chanda.html"> चंदा सूची </a>
 
-            </a>
+          <a href="materials.html"> सामग्री/खरीद सूची </a>
 
-            <button
-                class="menu-toggle"
-                type="button"
-                aria-label="मेन्यू खोलें"
-                aria-expanded="false">
-                ☰
-            </button>
+          <!-- Instagram -->
+          <a
+            id="navbar-instagram"
+            class="nav-social nav-instagram"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+            title="Instagram"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="5"></rect>
 
-            <nav class="nav-links" aria-label="मुख्य नेविगेशन">
+              <circle cx="12" cy="12" r="4"></circle>
 
-                <a class="active" href="index.html">
-                    मुख्य पृष्ठ
-                </a>
+              <circle class="social-dot" cx="18" cy="6" r="1"></circle>
+            </svg>
 
-                <a href="chanda.html">
-                    चंदा सूची
-                </a>
+            <span>Instagram</span>
+          </a>
 
-                <a href="materials.html">
-                    सामग्री/खरीद सूची
-                </a>
+          <!-- WhatsApp -->
+          <a
+            id="navbar-whatsapp"
+            class="nav-social nav-whatsapp"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp"
+            title="WhatsApp"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M20.5 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.6A8.5 8.5 0 1 1 20.5 11.5Z"
+              ></path>
 
-                <!-- Instagram -->
-                <a
-                    id="navbar-instagram"
-                    class="nav-social nav-instagram"
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Instagram"
-                    title="Instagram">
+              <path
+                d="M8.5 8.2c.3-.5.6-.5.9-.5h.4c.2 0 .4.1.5.4l.8 1.8c.1.2.1.4-.1.6l-.6.7c-.2.2-.2.4 0 .7.6 1 1.5 1.8 2.5 2.3.2.1.4.1.6-.1l.8-.9c.2-.2.4-.2.7-.1l1.7.8c.3.1.4.3.4.5 0 .3-.2 1.2-.8 1.6-.5.4-1.2.6-2 .4-1-.2-2.3-.8-3.7-2-1.2-1.1-2-2.4-2.3-3.3-.3-.9 0-1.7.3-2.1Z"
+              ></path>
+            </svg>
 
-                    <svg
-                        viewBox="0 0 24 24"
-                        aria-hidden="true">
-
-                        <rect
-                            x="3"
-                            y="3"
-                            width="18"
-                            height="18"
-                            rx="5">
-                        </rect>
-
-                        <circle
-                            cx="12"
-                            cy="12"
-                            r="4">
-                        </circle>
-
-                        <circle
-                            class="social-dot"
-                            cx="18"
-                            cy="6"
-                            r="1">
-                        </circle>
-
-                    </svg>
-
-                    <span>Instagram</span>
-
-                </a>
-
-                <!-- WhatsApp -->
-                <a
-                    id="navbar-whatsapp"
-                    class="nav-social nav-whatsapp"
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="WhatsApp"
-                    title="WhatsApp">
-
-                    <svg
-                        viewBox="0 0 24 24"
-                        aria-hidden="true">
-
-                        <path
-                            d="M20.5 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.6A8.5 8.5 0 1 1 20.5 11.5Z">
-                        </path>
-
-                        <path
-                            d="M8.5 8.2c.3-.5.6-.5.9-.5h.4c.2 0 .4.1.5.4l.8 1.8c.1.2.1.4-.1.6l-.6.7c-.2.2-.2.4 0 .7.6 1 1.5 1.8 2.5 2.3.2.1.4.1.6-.1l.8-.9c.2-.2.4-.2.7-.1l1.7.8c.3.1.4.3.4.5 0 .3-.2 1.2-.8 1.6-.5.4-1.2.6-2 .4-1-.2-2.3-.8-3.7-2-1.2-1.1-2-2.4-2.3-3.3-.3-.9 0-1.7.3-2.1Z">
-                        </path>
-
-                    </svg>
-
-                    <span>WhatsApp</span>
-
-                </a>
-
-            </nav>
-
-        </div>
-
+            <span>WhatsApp</span>
+          </a>
+        </nav>
+      </div>
     </header>
-
 
     <!-- =========================
          MAIN CONTENT
     ========================== -->
 
     <main>
+      <!-- HERO SECTION -->
 
-        <!-- HERO SECTION -->
+      <section class="hero">
+        <div class="container hero-inner">
+          <span class="eyebrow"> 🙏 जय छठी मैया 🙏 </span>
 
-        <section class="hero">
+          <h1>
+            श्री श्री सूर्य पूजा समिति
+            <br />
+            <span>युवा क्लब मंच</span>
+          </h1>
 
-            <div class="container hero-inner">
+          <p>
+            स्थान – गंजपर, अथर्मलगोला, पटना, बिहार। छठ महापर्व के पावन अवसर पर
+            आप सभी श्रद्धालुओं का हार्दिक स्वागत है। आपके सहयोग से छठी मैया की
+            पूजा एवं सामूहिक आयोजन सफल बनता है। चंदा और सामग्री का विवरण यहाँ
+            पारदर्शी रूप से उपलब्ध है।
+          </p>
 
-                <span class="eyebrow">
-                    जय छठी मैया 🙏
-                </span>
+          <div class="hero-actions">
+            <a class="btn btn-light" href="chanda.html"> चंदा सूची देखें </a>
 
-                <h1>
-                    छठ महापर्व में आपका
-                    <br>
-                    <span>हार्दिक स्वागत है</span>
-                </h1>
+            <a class="btn btn-outline-light" href="materials.html">
+              सामग्री सूची देखें
+            </a>
+          </div>
 
-                <p>
-                    आपका सहयोग हमारी श्रद्धा और सामूहिक सेवा को मजबूत
-                    बनाता है। चंदा और सामग्री का विवरण सबके लिए
-                    पारदर्शी रूप से उपलब्ध है।
-                </p>
+          <div class="sun-motif" aria-hidden="true">☀</div>
+        </div>
+      </section>
 
-                <div class="hero-actions">
+      <!-- SUMMARY / STATISTICS -->
 
-                    <a class="btn btn-light" href="chanda.html">
-                        चंदा सूची देखें
-                    </a>
+      <section class="container section">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow dark"> समिति का हिसाब </span>
 
-                    <a
-                        class="btn btn-outline-light"
-                        href="materials.html">
-                        सामग्री सूची देखें
-                    </a>
+            <h2>सहयोग की जानकारी</h2>
+          </div>
 
-                </div>
+          <!-- <p>हर मोबाइल पर एक ही साझा जानकारी</p> -->
+        </div>
 
-                <div class="sun-motif" aria-hidden="true">
-                    ☀
-                </div>
+        <div class="stats-grid">
+          <article class="stat-card">
+            <span class="stat-icon">🙏</span>
 
+            <div>
+              <p>कुल चंदा</p>
+
+              <strong id="total-donations"> लोड हो रहा है… </strong>
             </div>
+          </article>
 
-        </section>
+          <article class="stat-card">
+            <span class="stat-icon">🧺</span>
 
+            <div>
+              <p>सामग्री/खरीद सूची</p>
 
-        <!-- SUMMARY / STATISTICS -->
-
-        <section class="container section">
-
-            <div class="section-heading">
-
-                <div>
-                    <span class="eyebrow dark">
-                        समिति का हिसाब
-                    </span>
-
-                    <h2>सहयोग की जानकारी</h2>
-                </div>
-
-                <p>
-                    हर मोबाइल पर एक ही साझा जानकारी
-                </p>
-
+              <strong id="material-count"> लोड हो रहा है… </strong>
             </div>
+          </article>
 
-            <div class="stats-grid">
+          <article class="stat-card">
+            <span class="stat-icon">🪔</span>
 
-                <article class="stat-card">
+            <div>
+              <p>कुल दानदाता</p>
 
-                    <span class="stat-icon">🙏</span>
-
-                    <div>
-                        <p>कुल चंदा</p>
-
-                        <strong id="total-donations">
-                            लोड हो रहा है…
-                        </strong>
-                    </div>
-
-                </article>
-
-                <article class="stat-card">
-
-                    <span class="stat-icon">🧺</span>
-
-                    <div>
-                        <p>सामग्री/खरीद सूची</p>
-
-                        <strong id="material-count">
-                            लोड हो रहा है…
-                        </strong>
-                    </div>
-
-                </article>
-
-                <article class="stat-card">
-
-                    <span class="stat-icon">🪔</span>
-
-                    <div>
-                        <p>कुल दानदाता</p>
-
-                        <strong id="donor-count">
-                            लोड हो रहा है…
-                        </strong>
-                    </div>
-
-                </article>
-
+              <strong id="donor-count"> लोड हो रहा है… </strong>
             </div>
+          </article>
+        </div>
+      </section>
 
-        </section>
+      <!-- TOP FIVE DONORS -->
 
+      <section class="container section top-donors-section">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow dark"> सम्मान और आभार </span>
 
-        <!-- TOP FIVE DONORS -->
+            <h2>🙏 शीर्ष 5 दानदाता</h2>
+          </div>
 
-        <section class="container section top-donors-section">
+          <a class="text-link" href="chanda.html"> पूरी चंदा सूची देखें → </a>
+        </div>
 
-            <div class="section-heading">
+        <p class="top-donors-intro">
+          छठ महापर्व में सहयोग देने वाले सभी दानदाताओं का हार्दिक आभार।
+        </p>
 
-                <div>
-                    <span class="eyebrow dark">
-                        सम्मान और आभार
-                    </span>
+        <div id="top-donors" class="top-donors">
+          <div class="empty-state">दानदाताओं की सूची लोड हो रही है...</div>
+        </div>
+      </section>
 
-                    <h2>🙏 शीर्ष 5 दानदाता</h2>
-                </div>
+      <!-- SOCIAL MEDIA SECTION -->
 
-                <a class="text-link" href="chanda.html">
-                    पूरी चंदा सूची देखें →
-                </a>
-
-            </div>
-
-            <p class="top-donors-intro">
-                छठ महापर्व में सहयोग देने वाले सभी दानदाताओं का
-                हार्दिक आभार।
-            </p>
-
-            <div id="top-donors" class="top-donors">
-
-                <div class="empty-state">
-                    दानदाताओं की सूची लोड हो रही है...
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- SOCIAL MEDIA SECTION -->
-
-        <!-- <section class="container section social-section">
+      <!-- <section class="container section social-section">
 
             <div class="section-heading">
 
@@ -384,78 +290,182 @@
 
         </section> -->
 
+      <!-- QUICK LINKS -->
 
-        <!-- QUICK LINKS -->
+      <!-- Financial Summary Section -->
+      <section class="chanda-finance-section">
+        <div class="chanda-finance-container">
+          <!-- Section Heading -->
+          <div class="chanda-finance-header">
+            <span class="chanda-finance-eyebrow"> 🙏 जय छठी मैया 🙏 </span>
 
-        <section class="container section quick-links">
+            <h2>समिति का आय-व्यय विवरण</h2>
 
-            <a class="quick-card" href="chanda.html">
+            <p>श्री श्री सूर्य पूजा समिति — युवा क्लब मंच</p>
 
-                <span>📋</span>
+            <div class="chanda-finance-divider"></div>
 
-                <div>
-                    <h3>चंदा सूची</h3>
+            <span class="chanda-finance-subtitle">
+              चंदा, खरीदारी, एडवांस भुगतान एवं शेष राशि का पारदर्शी हिसाब
+            </span>
+          </div>
 
-                    <p>
-                        दानदाता का नाम, राशि, संपर्क और फोटो विवरण देखें
-                        और नया चंदा जोड़ें।
-                    </p>
+          <!-- Financial Cards -->
+          <div class="chanda-finance-grid">
+            <!-- Total Donation -->
+            <div class="chanda-finance-card donation-card">
+              <div class="chanda-finance-card-top">
+                <div class="chanda-finance-icon">🙏</div>
+                <span class="chanda-finance-badge">कुल आय</span>
+              </div>
 
-                    <b>चंदा सूची खोलें →</b>
-                </div>
+              <h3>कुल चंदा प्राप्त</h3>
 
-            </a>
+              <div class="chanda-finance-amount">₹50,000</div>
 
+              <p>लोगों से प्राप्त कुल चंदा राशि</p>
+            </div>
 
-            <a class="quick-card" href="materials.html">
+            <!-- Total Purchase Expense -->
+            <div class="chanda-finance-card expense-card">
+              <div class="chanda-finance-card-top">
+                <div class="chanda-finance-icon">🛒</div>
+                <span class="chanda-finance-badge">खर्च</span>
+              </div>
 
-                <span>🛒</span>
+              <h3>सामान पर कुल खर्च</h3>
 
-                <div>
-                    <h3>सामग्री/खरीद सूची</h3>
+              <div class="chanda-finance-amount">₹18,000</div>
 
-                    <p>
-                        पूजा की सामग्री, विवरण, फोटो, अग्रिम भुगतान
-                        और कुल रकम दर्ज करें।
-                    </p>
+              <p>पूजा सामग्री एवं अन्य वस्तुओं की कुल लागत</p>
+            </div>
 
-                    <b>सामग्री सूची खोलें →</b>
-                </div>
+            <!-- Advance Paid -->
+            <div class="chanda-finance-card advance-card">
+              <div class="chanda-finance-card-top">
+                <div class="chanda-finance-icon">💳</div>
+                <span class="chanda-finance-badge">भुगतान</span>
+              </div>
 
-            </a>
+              <h3>कुल एडवांस भुगतान</h3>
 
-        </section>
+              <div class="chanda-finance-amount">₹5,000</div>
 
+              <p>दुकानदारों एवं अन्य लोगों को दिया गया एडवांस</p>
+            </div>
+
+            <!-- Outstanding Payment -->
+            <div class="chanda-finance-card pending-card">
+              <div class="chanda-finance-card-top">
+                <div class="chanda-finance-icon">📋</div>
+                <span class="chanda-finance-badge">बकाया</span>
+              </div>
+
+              <h3>कुल बकाया भुगतान</h3>
+
+              <div class="chanda-finance-amount">₹13,000</div>
+
+              <p>सामान की कुल लागत में से बाकी भुगतान</p>
+            </div>
+
+            <!-- Available Cash -->
+            <div class="chanda-finance-card balance-card">
+              <div class="chanda-finance-card-top">
+                <div class="chanda-finance-icon">🏦</div>
+                <span class="chanda-finance-badge">उपलब्ध राशि</span>
+              </div>
+
+              <h3>समिति के पास उपलब्ध राशि</h3>
+
+              <div class="chanda-finance-amount">₹32,000</div>
+
+              <p>
+                प्राप्त चंदे में से अब तक किए गए वास्तविक भुगतानों के बाद बची
+                राशि
+              </p>
+            </div>
+
+            <!-- Remaining Balance -->
+            <div class="chanda-finance-card remaining-card">
+              <div class="chanda-finance-card-top">
+                <div class="chanda-finance-icon">🎯</div>
+                <span class="chanda-finance-badge">शेष राशि</span>
+              </div>
+
+              <h3>आय-व्यय के बाद शेष</h3>
+
+              <div class="chanda-finance-amount">₹32,000</div>
+
+              <p>कुल प्राप्त चंदे में से कुल खर्च घटाने के बाद बची राशि</p>
+            </div>
+          </div>
+
+          <!-- Financial Note -->
+          <div class="chanda-finance-note">
+            <span class="chanda-finance-note-icon">ℹ️</span>
+
+            <div>
+              <h4>हिसाब-किताब के संबंध में</h4>
+
+              <p>
+                समिति के सभी आय-व्यय का विवरण पारदर्शी रखने का प्रयास किया गया
+                है। एडवांस भुगतान को सामान की कुल लागत से अलग दर्ज किया गया है,
+                ताकि भुगतान और बकाया राशि का सही हिसाब रखा जा सके।
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="container section quick-links">
+        <a class="quick-card" href="chanda.html">
+          <span>📋</span>
+
+          <div>
+            <h3>चंदा सूची</h3>
+
+            <p>
+              दानदाता का नाम, राशि, संपर्क और फोटो विवरण देखें और नया चंदा
+              जोड़ें।
+            </p>
+
+            <b>चंदा सूची खोलें →</b>
+          </div>
+        </a>
+
+        <a class="quick-card" href="materials.html">
+          <span>🛒</span>
+
+          <div>
+            <h3>सामग्री/खरीद सूची</h3>
+
+            <p>
+              पूजा की सामग्री, विवरण, फोटो, अग्रिम भुगतान और कुल रकम दर्ज करें।
+            </p>
+
+            <b>सामग्री सूची खोलें →</b>
+          </div>
+        </a>
+      </section>
     </main>
-
 
     <!-- =========================
          FOOTER
     ========================== -->
 
     <footer class="site-footer">
+      <div class="container footer-inner">
+        <div>
+          <strong>☀ छठ पूजा समिति</strong>
 
-        <div class="container footer-inner">
-
-            <div>
-                <strong>☀ छठ पूजा समिति</strong>
-
-                <p>
-                    छठी मैया की कृपा सभी पर बनी रहे।
-                </p>
-            </div>
-
-            <p>
-                साझा हिसाब • पारदर्शी सहयोग
-            </p>
-
+          <p>छठी मैया की कृपा सभी पर बनी रहे।</p>
         </div>
 
+        <p>साझा हिसाब • पारदर्शी सहयोग</p>
+      </div>
     </footer>
 
-
     <div id="toast" class="toast" role="status"></div>
-
 
     <!-- =========================
          SCRIPTS
@@ -471,57 +481,47 @@
 
     <!-- सोशल मीडिया URL सेट करना -->
     <script>
-        (function () {
-            const instagramUrl =
-                window.INSTAGRAM_URL || "";
+      (function () {
+        const instagramUrl = window.INSTAGRAM_URL || "";
 
-            const whatsappUrl =
-                window.WHATSAPP_URL || "";
+        const whatsappUrl = window.WHATSAPP_URL || "";
 
-            const socialLinks = [
-                {
-                    ids: [
-                        "navbar-instagram",
-                        "instagram-link"
-                    ],
-                    url: instagramUrl
-                },
-                {
-                    ids: [
-                        "navbar-whatsapp",
-                        "whatsapp-link"
-                    ],
-                    url: whatsappUrl
-                }
-            ];
+        const socialLinks = [
+          {
+            ids: ["navbar-instagram", "instagram-link"],
+            url: instagramUrl,
+          },
+          {
+            ids: ["navbar-whatsapp", "whatsapp-link"],
+            url: whatsappUrl,
+          },
+        ];
 
-            socialLinks.forEach(function (item) {
-                item.ids.forEach(function (id) {
-                    const link = document.getElementById(id);
+        socialLinks.forEach(function (item) {
+          item.ids.forEach(function (id) {
+            const link = document.getElementById(id);
 
-                    if (!link) {
-                        return;
-                    }
+            if (!link) {
+              return;
+            }
 
-                    if (item.url) {
-                        link.href = item.url;
-                        link.target = "_blank";
-                        link.rel = "noopener noreferrer";
-                        link.removeAttribute("aria-disabled");
-                    } else {
-                        link.href = "#";
-                        link.removeAttribute("target");
-                        link.setAttribute("aria-disabled", "true");
+            if (item.url) {
+              link.href = item.url;
+              link.target = "_blank";
+              link.rel = "noopener noreferrer";
+              link.removeAttribute("aria-disabled");
+            } else {
+              link.href = "#";
+              link.removeAttribute("target");
+              link.setAttribute("aria-disabled", "true");
 
-                        link.addEventListener("click", function (event) {
-                            event.preventDefault();
-                        });
-                    }
-                });
-            });
-        })();
+              link.addEventListener("click", function (event) {
+                event.preventDefault();
+              });
+            }
+          });
+        });
+      })();
     </script>
-
-</body>
-
+  </body>
 </html>
