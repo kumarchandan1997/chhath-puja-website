@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#9a3412">
+  <title>छठ पूजा समिति | मुख्य पृष्ठ</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container nav-wrap">
+    <a class="brand" href="index.html"><span class="brand-icon">☀</span><span><strong>छठ पूजा समिति</strong><small>आस्था • सेवा • सहयोग</small></span></a>
+    <button class="menu-toggle" aria-label="मेन्यू खोलें" aria-expanded="false">☰</button>
+    <nav class="nav-links">
+      <a class="active" href="index.html">मुख्य पृष्ठ</a>
+      <a href="chanda.html">चंदा सूची</a>
+      <a href="materials.html">सामग्री/खरीद सूची</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <section class="hero">
+    <div class="container hero-inner">
+      <span class="eyebrow">जय छठी मैया 🙏</span>
+      <h1>छठ महापर्व में आपका<br><span>हार्दिक स्वागत है</span></h1>
+      <p>आपका सहयोग हमारी श्रद्धा और सामूहिक सेवा को मजबूत बनाता है। चंदा और सामग्री का विवरण सबके लिए पारदर्शी रूप से उपलब्ध है।</p>
+      <div class="hero-actions">
+        <a class="btn btn-light" href="chanda.html">चंदा जोड़ें</a>
+        <a class="btn btn-outline-light" href="materials.html">सामग्री सूची देखें</a>
+      </div>
+      <div class="sun-motif" aria-hidden="true">☀</div>
+    </div>
+  </section>
+  <section class="container section">
+    <div class="section-heading">
+      <div><span class="eyebrow dark">समिति का हिसाब</span><h2>सहयोग की जानकारी</h2></div>
+      <p>हर मोबाइल पर एक ही साझा जानकारी</p>
+    </div>
+    <div class="stats-grid">
+      <article class="stat-card"><span class="stat-icon">🙏</span><div><p>कुल चंदा</p><strong id="total-donations">लोड हो रहा है…</strong></div></article>
+      <article class="stat-card"><span class="stat-icon">🧺</span><div><p>सामग्री/खरीद सूची</p><strong id="material-count">लोड हो रहा है…</strong></div></article>
+      <article class="stat-card"><span class="stat-icon">🪔</span><div><p>कुल दानदाता</p><strong id="donor-count">लोड हो रहा है…</strong></div></article>
+    </div>
+  </section>
+  <section class="container section">
+    <div class="section-heading">
+      <div><span class="eyebrow dark">सम्मान और आभार</span><h2>शीर्ष 5 दानदाता</h2></div>
+      <a class="text-link" href="chanda.html">पूरी चंदा सूची देखें →</a>
+    </div>
+    <div id="top-donors" class="top-donors"><div class="empty-state">डेटा लोड हो रहा है…</div></div>
+  </section>
+  <section class="container section quick-links">
+    <a class="quick-card" href="chanda.html"><span>📋</span><div><h3>चंदा सूची</h3><p>दानदाता का नाम, राशि, संपर्क और रसीद/फोटो विवरण जोड़ें।</p><b>चंदा सूची खोलें →</b></div></a>
+    <a class="quick-card" href="materials.html"><span>🛒</span><div><h3>सामग्री/खरीद सूची</h3><p>पूजा की सामग्री, विवरण, फोटो, अग्रिम भुगतान और कुल रकम दर्ज करें।</p><b>सामग्री सूची खोलें →</b></div></a>
+  </section>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><div><strong>☀ छठ पूजा समिति</strong><p>छठी मैया की कृपा सभी पर बनी रहे।</p></div><p>साझा हिसाब • पारदर्शी सहयोग</p></div></footer>
+<div id="toast" class="toast" role="status"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/config.js"></script><script src="assets/js/common.js"></script><script src="assets/js/home.js"></script>
+</body></html>

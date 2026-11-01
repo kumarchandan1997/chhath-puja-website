@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="hi">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#9a3412"><title>सामग्री/खरीद सूची | छठ पूजा समिति</title><link rel="stylesheet" href="assets/css/style.css"></head>
+<body>
+<header class="site-header"><div class="container nav-wrap"><a class="brand" href="index.html"><span class="brand-icon">☀</span><span><strong>छठ पूजा समिति</strong><small>आस्था • सेवा • सहयोग</small></span></a><button class="menu-toggle" aria-label="मेन्यू खोलें" aria-expanded="false">☰</button><nav class="nav-links"><a href="index.html">मुख्य पृष्ठ</a><a href="chanda.html">चंदा सूची</a><a class="active" href="materials.html">सामग्री/खरीद सूची</a></nav></div></header>
+<main class="container page-main">
+  <div class="page-title"><span class="eyebrow dark">पूजा की तैयारी</span><h1>सामग्री / खरीद सूची</h1><p>छठ पूजा के लिए खरीदी जाने वाली सामग्री और खर्च का हिसाब साझा करें।</p></div>
+  <section class="form-panel">
+    <div class="panel-heading"><div><h2>➕ नई सामग्री जोड़ें</h2><p>सामग्री और भुगतान का विवरण दर्ज करें।</p></div><span class="pill">खरीद विवरण</span></div>
+    <form id="material-form" class="form-grid">
+      <label>सामग्री का नाम *<input name="material_name" required maxlength="150" placeholder="जैसे: बाँस का सूप"></label>
+      <label>कुल रकम (₹) *<input name="total_amount" required type="number" min="0" step="0.01" placeholder="जैसे: 2500"></label>
+      <label class="full">संक्षिप्त विवरण<input name="description" maxlength="250" placeholder="जैसे: पूजा के लिए 10 सूप"></label>
+      <label class="full">विस्तृत विवरण<textarea name="details_description" rows="4" maxlength="2000" placeholder="मात्रा, दुकानदार, खरीद की तारीख या अन्य जानकारी"></textarea></label>
+      <label>अग्रिम भुगतान (₹)<input name="advance_paid" type="number" min="0" step="0.01" value="0"></label>
+      <label>सामग्री की फोटो (वैकल्पिक)<input name="image" type="file" accept="image/*"></label>
+      <div class="full payment-preview"><span>बाकी भुगतान</span><strong id="balance-preview">₹0.00</strong><small>कुल रकम − अग्रिम भुगतान</small></div>
+      <div class="form-actions full"><button class="btn btn-primary" type="submit">सामग्री सेव करें</button><span class="form-note">* जरूरी जानकारी</span></div>
+    </form>
+  </section>
+  <section class="list-section">
+    <div class="section-heading"><div><span class="eyebrow dark">सभी सामग्री रिकॉर्ड</span><h2>खरीद और खर्च की सूची</h2></div><button id="export-materials" class="btn btn-secondary" type="button">JSON डाउनलोड करें</button></div>
+    <div class="toolbar"><input id="material-search" type="search" placeholder="सामग्री के नाम या विवरण से खोजें…" aria-label="सामग्री सूची खोजें"><span id="material-summary" class="muted">लोड हो रहा है…</span></div>
+    <div id="material-list" class="material-grid"><div class="empty-state">डेटा लोड हो रहा है…</div></div>
+    <div id="material-pagination" class="pagination"></div>
+  </section>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><div><strong>☀ छठ पूजा समिति</strong><p>छठी मैया की कृपा सभी पर बनी रहे।</p></div><p>साझा हिसाब • पारदर्शी सहयोग</p></div></footer><div id="toast" class="toast" role="status"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/js/config.js"></script><script src="assets/js/common.js"></script><script src="assets/js/materials.js"></script>
+</body></html>

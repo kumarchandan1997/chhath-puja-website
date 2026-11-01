@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="hi">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#9a3412"><title>चंदा सूची | छठ पूजा समिति</title><link rel="stylesheet" href="assets/css/style.css"></head>
+<body>
+<header class="site-header"><div class="container nav-wrap"><a class="brand" href="index.html"><span class="brand-icon">☀</span><span><strong>छठ पूजा समिति</strong><small>आस्था • सेवा • सहयोग</small></span></a><button class="menu-toggle" aria-label="मेन्यू खोलें" aria-expanded="false">☰</button><nav class="nav-links"><a href="index.html">मुख्य पृष्ठ</a><a class="active" href="chanda.html">चंदा सूची</a><a href="materials.html">सामग्री/खरीद सूची</a></nav></div></header>
+<main class="container page-main">
+  <div class="page-title"><span class="eyebrow dark">साझा चंदा रजिस्टर</span><h1>चंदा सूची</h1><p>यहाँ जो रिकॉर्ड जोड़ा जाएगा, वह दूसरे मोबाइल पर भी दिखाई देगा।</p></div>
+  <section class="form-panel">
+    <div class="panel-heading"><div><h2>➕ नया चंदा जोड़ें</h2><p>कृपया सही जानकारी भरें।</p></div><span class="pill">दान विवरण</span></div>
+    <form id="donation-form" class="form-grid">
+      <label>दानदाता का नाम *<input name="name" required maxlength="120" placeholder="जैसे: राम कुमार"></label>
+      <label>मोबाइल नंबर<input name="mobile" inputmode="tel" maxlength="20" placeholder="मोबाइल नंबर"></label>
+      <label class="full">पता<input name="address" maxlength="250" placeholder="गाँव / मोहल्ला / पता"></label>
+      <label>चंदा राशि (₹) *<input name="amount" required type="number" min="1" step="0.01" placeholder="जैसे: 1100"></label>
+      <label>फोटो (वैकल्पिक)<input name="image" type="file" accept="image/*"></label>
+      <label class="full">टिप्पणी / रिमार्क<textarea name="remarks" rows="3" maxlength="1000" placeholder="कोई अतिरिक्त जानकारी"></textarea></label>
+      <div class="form-actions full"><button class="btn btn-primary" type="submit">चंदा सेव करें</button><span class="form-note">* जरूरी जानकारी</span></div>
+    </form>
+  </section>
+  <section class="list-section">
+    <div class="section-heading"><div><span class="eyebrow dark">सभी रिकॉर्ड</span><h2>दानदाताओं की सूची</h2></div><button id="export-donations" class="btn btn-secondary" type="button">JSON डाउनलोड करें</button></div>
+    <div class="toolbar"><input id="donation-search" type="search" placeholder="नाम, मोबाइल या पते से खोजें…" aria-label="चंदा सूची खोजें"><span id="donation-summary" class="muted">लोड हो रहा है…</span></div>
+    <div id="donation-list" class="record-list"><div class="empty-state">डेटा लोड हो रहा है…</div></div>
+    <div id="donation-pagination" class="pagination"></div>
+  </section>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><div><strong>☀ छठ पूजा समिति</strong><p>छठी मैया की कृपा सभी पर बनी रहे।</p></div><p>साझा हिसाब • पारदर्शी सहयोग</p></div></footer><div id="toast" class="toast" role="status"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/js/config.js"></script><script src="assets/js/common.js"></script><script src="assets/js/chanda.js"></script>
+</body></html>
