@@ -897,6 +897,73 @@
     });
 
     // ==================================================
+    // ADMIN SESSION + ADD DONATION BUTTON
+    // ==================================================
+
+    const ADMIN_SESSION_KEY = "chhath_admin_mobile";
+
+    function setDonationButtonVisible(isLoggedIn) {
+        if (!openModalButton) return;
+
+        openModalButton.hidden = !isLoggedIn;
+        openModalButton.style.setProperty(
+            "display",
+            isLoggedIn ? "inline-flex" : "none",
+            "important"
+        );
+        openModalButton.setAttribute("aria-hidden", isLoggedIn ? "false" : "true");
+    }
+
+    async function restoreAdminSession() {
+        const savedMobile = sessionStorage.getItem(ADMIN_SESSION_KEY);
+
+        if (!savedMobile || !db || typeof db.rpc !== "function") {
+            setDonationButtonVisible(false);
+            return;
+        }
+
+        try {
+            const { data, error } = await db.rpc(
+                "check_authorized_mobile",
+                { input_mobile: savedMobile }
+            );
+
+            if (error) throw error;
+
+            const authorized = data === true || data === "true" ||
+                (Array.isArray(data) && data.length > 0 && (
+                    data[0] === true ||
+                    data[0]?.check_authorized_mobile === true ||
+                    data[0]?.check_authorized_mobile === "true"
+                ));
+
+            if (authorized) {
+                setDonationButtonVisible(true);
+            } else {
+                sessionStorage.removeItem(ADMIN_SESSION_KEY);
+                setDonationButtonVisible(false);
+            }
+        } catch (error) {
+            console.error("Admin session verification failed:", error);
+            setDonationButtonVisible(false);
+        }
+    }
+
+    // Login/logout happens on this page or another page in the same tab.
+    window.addEventListener("chhath-admin-login-changed", function (event) {
+        if (event.detail?.loggedIn === false) {
+            sessionStorage.removeItem(ADMIN_SESSION_KEY);
+            setDonationButtonVisible(false);
+        } else if (event.detail?.loggedIn === true) {
+            restoreAdminSession();
+        }
+    });
+
+    // Hide immediately, then verify the saved session against Supabase.
+    setDonationButtonVisible(false);
+    restoreAdminSession();
+
+    // ==================================================
     // INITIALIZE
     // ==================================================
 

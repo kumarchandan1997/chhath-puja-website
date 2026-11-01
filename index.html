@@ -42,6 +42,21 @@
 
           <a href="materials.html"> सामग्री/खरीद सूची </a>
 
+          <!-- Navbar Login Button -->
+          <button type="button" id="admin-login-button" class="btn btn-primary">
+            🔐 Login
+          </button>
+
+          <!-- Logout Button: शुरुआत में छिपा रहेगा -->
+          <button
+            type="button"
+            id="admin-logout-button"
+            class="btn btn-secondary"
+            style="display: none"
+          >
+            Logout
+          </button>
+
           <!-- Instagram -->
           <a
             id="navbar-instagram"
@@ -467,6 +482,75 @@
 
     <div id="toast" class="toast" role="status"></div>
 
+    <!-- Admin Login Modal -->
+<div
+    id="admin-login-modal"
+    class="donation-modal"
+    aria-hidden="true">
+
+    <div class="donation-modal-dialog">
+
+        <div class="donation-modal-header">
+            <div>
+                <h2>Admin Login</h2>
+                <p>अधिकृत मोबाइल नंबर दर्ज करें।</p>
+            </div>
+
+            <button
+                type="button"
+                id="admin-login-close"
+                class="donation-modal-close"
+                aria-label="Close">
+                &times;
+            </button>
+        </div>
+
+        <form id="admin-login-form">
+
+            <label for="admin-mobile-number">
+                मोबाइल नंबर
+                <input
+                    type="tel"
+                    id="admin-mobile-number"
+                    name="mobile"
+                    inputmode="numeric"
+                    autocomplete="tel"
+                    maxlength="10"
+                    pattern="[0-9]{10}"
+                    placeholder="10 अंकों का मोबाइल नंबर"
+                    required>
+            </label>
+
+            <div
+                id="admin-login-message"
+                role="status"
+                aria-live="polite"
+                style="display:none;">
+            </div>
+
+            <div class="form-actions" style="margin-top:16px;">
+
+                <button
+                    type="submit"
+                    id="admin-login-submit"
+                    class="btn btn-primary">
+                    Login करें
+                </button>
+
+                <button
+                    type="button"
+                    id="admin-login-cancel"
+                    class="btn btn-secondary">
+                    Cancel
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
     <!-- =========================
          SCRIPTS
     ========================== -->
@@ -479,7 +563,260 @@
 
     <script src="assets/js/home.js"></script>
 
-    <!-- सोशल मीडिया URL सेट करना -->
+
+    <!-- Admin login modal behavior -->
+    <style>
+      #admin-login-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        background: rgba(15, 23, 42, 0.68);
+        overflow-y: auto;
+      }
+      #admin-login-modal.is-open { display: flex; }
+      #admin-login-modal .donation-modal-dialog {
+        width: min(100%, 460px);
+        max-height: calc(100vh - 36px);
+        overflow-y: auto;
+        background: #fff;
+        color: #1f2937;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      }
+      #admin-login-modal .donation-modal-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+      #admin-login-modal .donation-modal-header h2 { margin: 0 0 8px; }
+      #admin-login-modal .donation-modal-header p { margin: 0; }
+      #admin-login-modal label { display: block; font-weight: 600; }
+      #admin-login-modal input {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 8px;
+        padding: 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font: inherit;
+      }
+      #admin-login-message {
+        margin-top: 14px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        line-height: 1.5;
+      }
+      #admin-login-message.success { display: block !important; color: #166534; background: #dcfce7; }
+      #admin-login-message.error { display: block !important; color: #991b1b; background: #fee2e2; }
+      body.admin-login-open { overflow: hidden; }
+    </style>
+
+    <script>
+      (function () {
+        "use strict";
+
+        const loginButton = document.getElementById("admin-login-button");
+        const logoutButton = document.getElementById("admin-logout-button");
+        const modal = document.getElementById("admin-login-modal");
+        const form = document.getElementById("admin-login-form");
+        const mobileInput = document.getElementById("admin-mobile-number");
+        const message = document.getElementById("admin-login-message");
+        const submitButton = document.getElementById("admin-login-submit");
+        const closeButton = document.getElementById("admin-login-close");
+        const cancelButton = document.getElementById("admin-login-cancel");
+        const SESSION_KEY = "chhath_admin_mobile";
+
+        if (!loginButton || !modal || !form) {
+          console.error("Admin login: required HTML element is missing.");
+          return;
+        }
+
+        let supabaseClient = window.db || window.supabaseClient || null;
+
+        if (
+          !supabaseClient &&
+          window.supabase &&
+          typeof window.supabase.createClient === "function" &&
+          window.SUPABASE_URL &&
+          window.SUPABASE_ANON_KEY
+        ) {
+          supabaseClient = window.supabase.createClient(
+            window.SUPABASE_URL,
+            window.SUPABASE_ANON_KEY
+          );
+        }
+
+        function showMessage(text, type) {
+          message.textContent = text;
+          message.className = type || "";
+          message.style.display = "block";
+        }
+
+        function clearMessage() {
+          message.textContent = "";
+          message.className = "";
+          message.style.display = "none";
+        }
+
+        function openModal() {
+          clearMessage();
+          modal.classList.add("is-open");
+          modal.setAttribute("aria-hidden", "false");
+          document.body.classList.add("admin-login-open");
+          window.setTimeout(function () {
+            if (mobileInput) mobileInput.focus();
+          }, 50);
+        }
+
+        function closeModal() {
+          modal.classList.remove("is-open");
+          modal.setAttribute("aria-hidden", "true");
+          document.body.classList.remove("admin-login-open");
+          form.reset();
+          clearMessage();
+        }
+
+        function setLoggedIn(isLoggedIn) {
+          loginButton.style.display = isLoggedIn ? "none" : "";
+          if (logoutButton) logoutButton.style.display = isLoggedIn ? "" : "none";
+          // chanda.html can read this same-session flag to show its add-donation button.
+          window.dispatchEvent(new CustomEvent("chhath-admin-login-changed", {
+            detail: { loggedIn: isLoggedIn }
+          }));
+        }
+
+        loginButton.addEventListener("click", function (event) {
+          event.preventDefault();
+          openModal();
+        });
+
+        if (closeButton) closeButton.addEventListener("click", closeModal);
+        if (cancelButton) cancelButton.addEventListener("click", closeModal);
+
+        modal.addEventListener("click", function (event) {
+          if (event.target === modal) closeModal();
+        });
+
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape" && modal.classList.contains("is-open")) {
+            closeModal();
+          }
+        });
+
+        if (logoutButton) {
+          logoutButton.addEventListener("click", function () {
+            sessionStorage.removeItem(SESSION_KEY);
+            setLoggedIn(false);
+            showMessage("आप लॉगआउट हो गए हैं।", "success");
+            window.setTimeout(closeModal, 700);
+          });
+        }
+
+        form.addEventListener("submit", async function (event) {
+          event.preventDefault();
+          clearMessage();
+
+          const mobile = (mobileInput.value || "").replace(/\D/g, "");
+
+          if (!/^[0-9]{10}$/.test(mobile)) {
+            showMessage("कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।", "error");
+            return;
+          }
+
+          if (!supabaseClient || typeof supabaseClient.rpc !== "function") {
+            console.error("Supabase client/config not found. Check assets/js/config.js.");
+            showMessage(
+              "Supabase कनेक्शन नहीं मिला। assets/js/config.js में SUPABASE_URL और SUPABASE_ANON_KEY जाँचें।",
+              "error"
+            );
+            return;
+          }
+
+          submitButton.disabled = true;
+          submitButton.textContent = "जाँच हो रही है…";
+
+          try {
+            const { data, error } = await supabaseClient.rpc(
+              "check_authorized_mobile",
+              { input_mobile: mobile }
+            );
+
+            if (error) {
+              console.error("Admin login RPC error:", error);
+              showMessage(
+                "मोबाइल नंबर जाँच नहीं हो सकी। Supabase में check_authorized_mobile फ़ंक्शन और उसकी permissions जाँचें।",
+                "error"
+              );
+              return;
+            }
+
+            const authorized =
+              data === true ||
+              data === "true" ||
+              (Array.isArray(data) && data.length > 0 &&
+                (data[0] === true || data[0]?.check_authorized_mobile === true));
+
+            if (!authorized) {
+              showMessage("यह मोबाइल नंबर अधिकृत नहीं है।", "error");
+              return;
+            }
+
+            sessionStorage.setItem(SESSION_KEY, mobile);
+            setLoggedIn(true);
+            showMessage("लॉगिन सफल! अब आप अधिकृत कार्य कर सकते हैं।", "success");
+            window.setTimeout(closeModal, 1000);
+          } catch (error) {
+            console.error("Admin login failed:", error);
+            showMessage("कुछ गड़बड़ी हुई। कृपया दोबारा प्रयास करें।", "error");
+          } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = "Login करें";
+          }
+        });
+
+        // Restore only the current-tab session and re-check it with Supabase.
+        (async function restoreSession() {
+          const mobile = sessionStorage.getItem(SESSION_KEY);
+          if (!mobile || !supabaseClient || typeof supabaseClient.rpc !== "function") {
+            setLoggedIn(false);
+            return;
+          }
+
+          try {
+            const { data, error } = await supabaseClient.rpc(
+              "check_authorized_mobile",
+              { input_mobile: mobile }
+            );
+            const authorized = !error && (
+              data === true ||
+              data === "true" ||
+              (Array.isArray(data) && data.length > 0 &&
+                (data[0] === true || data[0]?.check_authorized_mobile === true))
+            );
+
+            if (authorized) {
+              setLoggedIn(true);
+            } else {
+              sessionStorage.removeItem(SESSION_KEY);
+              setLoggedIn(false);
+            }
+          } catch (error) {
+            console.error("Could not restore admin session:", error);
+            setLoggedIn(false);
+          }
+        })();
+      })();
+    </script>
+
+        <!-- सोशल मीडिया URL सेट करना -->
     <script>
       (function () {
         const instagramUrl = window.INSTAGRAM_URL || "";

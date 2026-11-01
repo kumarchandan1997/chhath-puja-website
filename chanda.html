@@ -555,7 +555,21 @@
             }
         }
 
-    </style>
+    
+        /* Admin login modal */
+        #admin-login-modal { display:none; position:fixed; inset:0; z-index:10000; align-items:center; justify-content:center; padding:18px; background:rgba(15,23,42,.68); overflow-y:auto; }
+        #admin-login-modal.is-open { display:flex; }
+        #admin-login-modal .donation-modal-dialog { width:min(100%,460px); max-height:calc(100vh - 36px); overflow-y:auto; background:#fff; color:#1f2937; border-radius:16px; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,.25); }
+        #admin-login-modal .donation-modal-header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:20px; }
+        #admin-login-modal .donation-modal-header h2 { margin:0 0 8px; }
+        #admin-login-modal .donation-modal-header p { margin:0; }
+        #admin-login-modal label { display:block; font-weight:600; }
+        #admin-login-modal input { display:block; width:100%; box-sizing:border-box; margin-top:8px; padding:12px; border:1px solid #cbd5e1; border-radius:8px; font:inherit; }
+        #admin-login-message { margin-top:14px; padding:10px 12px; border-radius:8px; line-height:1.5; }
+        #admin-login-message.success { display:block !important; color:#166534; background:#dcfce7; }
+        #admin-login-message.error { display:block !important; color:#991b1b; background:#fee2e2; }
+        body.admin-login-open { overflow:hidden; }
+</style>
 </head>
 
 <body>
@@ -585,6 +599,8 @@
                 <a href="index.html">मुख्य पृष्ठ</a>
                 <a class="active" href="chanda.html">चंदा सूची</a>
                 <a href="materials.html">सामग्री/खरीद सूची</a>
+                <button type="button" id="admin-login-button" class="btn btn-primary">🔐 Login</button>
+                <button type="button" id="admin-logout-button" class="btn btn-secondary" style="display:none">Logout</button>
             </nav>
 
         </div>
@@ -640,7 +656,7 @@
                 <button
                     id="open-donation-modal"
                     class="btn btn-primary"
-                    type="button">
+                    type="button" style="display: none;">
                     ➕ नया चंदा जोड़ें
                 </button>
 
@@ -872,6 +888,30 @@
 
     </div>
 
+
+    <!-- Admin Login Modal -->
+    <div id="admin-login-modal" class="donation-modal" aria-hidden="true">
+        <div class="donation-modal-dialog">
+            <div class="donation-modal-header">
+                <div>
+                    <h2>Admin Login</h2>
+                    <p>अधिकृत मोबाइल नंबर दर्ज करें।</p>
+                </div>
+                <button type="button" id="admin-login-close" class="donation-modal-close" aria-label="Close">&times;</button>
+            </div>
+            <form id="admin-login-form">
+                <label for="admin-mobile-number">मोबाइल नंबर
+                    <input type="tel" id="admin-mobile-number" name="mobile" inputmode="numeric" autocomplete="tel" maxlength="10" pattern="[0-9]{10}" placeholder="10 अंकों का मोबाइल नंबर" required>
+                </label>
+                <div id="admin-login-message" role="status" aria-live="polite" style="display:none"></div>
+                <div class="form-actions" style="margin-top:16px">
+                    <button type="submit" id="admin-login-submit" class="btn btn-primary">Login करें</button>
+                    <button type="button" id="admin-login-cancel" class="btn btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="site-footer">
         <div class="container footer-inner">
@@ -1017,6 +1057,83 @@
 
     <!-- Donation page -->
     <script src="assets/js/chanda.js"></script>
+
+
+    <!-- Admin login behavior: uses the same Supabase RPC/session key as index.html -->
+    <script>
+    (function () {
+        "use strict";
+        const loginButton = document.getElementById("admin-login-button");
+        const logoutButton = document.getElementById("admin-logout-button");
+        const modal = document.getElementById("admin-login-modal");
+        const form = document.getElementById("admin-login-form");
+        const mobileInput = document.getElementById("admin-mobile-number");
+        const message = document.getElementById("admin-login-message");
+        const submitButton = document.getElementById("admin-login-submit");
+        const closeButton = document.getElementById("admin-login-close");
+        const cancelButton = document.getElementById("admin-login-cancel");
+        const SESSION_KEY = "chhath_admin_mobile";
+        if (!loginButton || !modal || !form) return;
+
+        let client = null;
+        if (window.supabase && typeof window.supabase.createClient === "function" && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+            client = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+        }
+        function say(text, type) {
+            message.textContent = text;
+            message.className = type || "";
+            message.style.display = "block";
+        }
+        function clearMessage() { message.textContent = ""; message.className = ""; message.style.display = "none"; }
+        function setLoggedIn(value) {
+            loginButton.style.display = value ? "none" : "";
+            if (logoutButton) logoutButton.style.display = value ? "" : "none";
+            window.dispatchEvent(new CustomEvent("chhath-admin-login-changed", { detail: { loggedIn: value } }));
+        }
+        function openModal() {
+            clearMessage(); modal.classList.add("is-open"); modal.setAttribute("aria-hidden", "false");
+            document.body.classList.add("admin-login-open"); setTimeout(() => mobileInput && mobileInput.focus(), 50);
+        }
+        function closeModal() {
+            modal.classList.remove("is-open"); modal.setAttribute("aria-hidden", "true");
+            document.body.classList.remove("admin-login-open"); form.reset(); clearMessage();
+        }
+        async function verify(mobile) {
+            if (!client || typeof client.rpc !== "function") throw new Error("Supabase config नहीं मिला। assets/js/config.js जाँचें।");
+            const { data, error } = await client.rpc("check_authorized_mobile", { input_mobile: mobile });
+            if (error) throw error;
+            return data === true || data === "true" || (Array.isArray(data) && data.length > 0 && (data[0] === true || data[0]?.check_authorized_mobile === true || data[0]?.check_authorized_mobile === "true"));
+        }
+        loginButton.addEventListener("click", openModal);
+        closeButton && closeButton.addEventListener("click", closeModal);
+        cancelButton && cancelButton.addEventListener("click", closeModal);
+        modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+        document.addEventListener("keydown", e => { if (e.key === "Escape" && modal.classList.contains("is-open")) closeModal(); });
+        logoutButton && logoutButton.addEventListener("click", function () {
+            sessionStorage.removeItem(SESSION_KEY); setLoggedIn(false); closeModal();
+        });
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault(); clearMessage();
+            const mobile = (mobileInput.value || "").replace(/\D/g, "");
+            if (!/^[0-9]{10}$/.test(mobile)) { say("कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।", "error"); return; }
+            submitButton.disabled = true; submitButton.textContent = "जाँच हो रही है…";
+            try {
+                if (await verify(mobile)) {
+                    sessionStorage.setItem(SESSION_KEY, mobile); setLoggedIn(true);
+                    say("लॉगिन सफल! अब नया चंदा जोड़ सकते हैं।", "success"); setTimeout(closeModal, 800);
+                } else { say("यह मोबाइल नंबर अधिकृत नहीं है।", "error"); }
+            } catch (error) {
+                console.error("Admin login error:", error); say(error.message || "लॉगिन नहीं हो सका।", "error");
+            } finally { submitButton.disabled = false; submitButton.textContent = "Login करें"; }
+        });
+        (async function restore() {
+            const mobile = sessionStorage.getItem(SESSION_KEY);
+            if (!mobile) { setLoggedIn(false); return; }
+            try { if (await verify(mobile)) setLoggedIn(true); else { sessionStorage.removeItem(SESSION_KEY); setLoggedIn(false); } }
+            catch (error) { console.error("Session restore failed:", error); setLoggedIn(false); }
+        })();
+    })();
+    </script>
 
 </body>
 

@@ -1,823 +1,775 @@
 <!doctype html>
 <html lang="hi">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#9a3412">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#9a3412" />
 
     <title>सामग्री/खरीद सूची | छठ पूजा समिति</title>
 
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css" />
 
     <style>
-        /* ======================================
+      /* ======================================
            PAGE LAYOUT
         ====================================== */
 
-        .material-toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 22px;
-        }
+      .material-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 22px;
+      }
 
-        .material-toolbar .btn {
-            white-space: nowrap;
-        }
+      .material-toolbar .btn {
+        white-space: nowrap;
+      }
 
-        .material-summary {
-            color: #78716c;
-            font-size: 14px;
-            margin-top: 8px;
-        }
+      .material-summary {
+        color: #78716c;
+        font-size: 14px;
+        margin-top: 8px;
+      }
 
-        .material-stats {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 14px;
-            margin-bottom: 25px;
-        }
+      .material-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 25px;
+      }
 
-        .material-stat {
-            padding: 20px;
-            border: 1px solid #f0dfcc;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #fffaf5, #fff0db);
-        }
+      .material-stat {
+        padding: 20px;
+        border: 1px solid #f0dfcc;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #fffaf5, #fff0db);
+      }
 
-        .material-stat span {
-            display: block;
-            margin-bottom: 9px;
-            color: #78716c;
-            font-size: 14px;
-        }
+      .material-stat span {
+        display: block;
+        margin-bottom: 9px;
+        color: #78716c;
+        font-size: 14px;
+      }
 
-        .material-stat strong {
-            display: block;
-            color: #9a3412;
-            font-size: 23px;
-            overflow-wrap: anywhere;
-        }
+      .material-stat strong {
+        display: block;
+        color: #9a3412;
+        font-size: 23px;
+        overflow-wrap: anywhere;
+      }
 
-        /* ======================================
+      /* ======================================
            MATERIAL CARDS
         ====================================== */
 
-        .material-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 22px;
-        }
+      .material-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 22px;
+      }
 
-        .material-card {
-            min-width: 0;
-            overflow: hidden;
-            border: 1px solid #f0dfcc;
-            border-radius: 16px;
-            background: #ffffff;
-            box-shadow: 0 5px 20px rgba(100, 45, 10, 0.07);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
+      .material-card {
+        min-width: 0;
+        overflow: hidden;
+        border: 1px solid #f0dfcc;
+        border-radius: 16px;
+        background: #ffffff;
+        box-shadow: 0 5px 20px rgba(100, 45, 10, 0.07);
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
 
-        .material-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 28px rgba(100, 45, 10, 0.12);
-        }
+      .material-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 28px rgba(100, 45, 10, 0.12);
+      }
 
-        /*
+      /*
          * महत्वपूर्ण:
          * object-fit: contain से पूरी फोटो दिखाई देगी।
          * फोटो के किनारे काटे नहीं जाएंगे।
          */
 
-        .material-image-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            min-height: 180px;
-            max-height: 360px;
-            padding: 10px;
-            overflow: hidden;
-            background: #fff7ed;
-            box-sizing: border-box;
-        }
+      .material-image-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 180px;
+        max-height: 360px;
+        padding: 10px;
+        overflow: hidden;
+        background: #fff7ed;
+        box-sizing: border-box;
+      }
 
-        .material-image {
-            display: block;
-            width: 100%;
-            height: auto;
-            max-height: 340px;
-            object-fit: contain;
-            object-position: center;
-            cursor: zoom-in;
-        }
+      .material-image {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 340px;
+        object-fit: contain;
+        object-position: center;
+        cursor: zoom-in;
+      }
 
-        .material-image-placeholder {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            min-height: 200px;
-            font-size: 65px;
-            background: linear-gradient(135deg, #fff7ed, #ffedd5);
-        }
+      .material-image-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 200px;
+        font-size: 65px;
+        background: linear-gradient(135deg, #fff7ed, #ffedd5);
+      }
 
-        .material-card-body {
-            padding: 19px;
-        }
+      .material-card-body {
+        padding: 19px;
+      }
 
-        .material-card-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 12px;
-        }
+      .material-card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
 
-        .material-card h3 {
-            margin: 0;
-            color: #7c2d12;
-            font-size: 20px;
-            line-height: 1.5;
-            overflow-wrap: anywhere;
-        }
+      .material-card h3 {
+        margin: 0;
+        color: #7c2d12;
+        font-size: 20px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+      }
 
-        .material-number {
-            flex-shrink: 0;
-            padding: 5px 9px;
-            border-radius: 20px;
-            background: #fff0c2;
-            color: #854d0e;
-            font-size: 12px;
-            font-weight: 700;
-        }
+      .material-number {
+        flex-shrink: 0;
+        padding: 5px 9px;
+        border-radius: 20px;
+        background: #fff0c2;
+        color: #854d0e;
+        font-size: 12px;
+        font-weight: 700;
+      }
 
-        .material-description {
-            margin: 13px 0;
-            color: #57534e;
-            font-size: 14px;
-            line-height: 1.8;
-            overflow-wrap: anywhere;
-            white-space: pre-wrap;
-        }
+      .material-description {
+        margin: 13px 0;
+        color: #57534e;
+        font-size: 14px;
+        line-height: 1.8;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+      }
 
-        .material-payment-box {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px;
-            margin-top: 16px;
-        }
+      .material-payment-box {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 16px;
+      }
 
-        .material-payment-item {
-            padding: 12px;
-            border-radius: 10px;
-            background: #fff7ed;
-            min-width: 0;
-        }
+      .material-payment-item {
+        padding: 12px;
+        border-radius: 10px;
+        background: #fff7ed;
+        min-width: 0;
+      }
 
-        .material-payment-item span {
-            display: block;
-            margin-bottom: 7px;
-            color: #78716c;
-            font-size: 12px;
-        }
+      .material-payment-item span {
+        display: block;
+        margin-bottom: 7px;
+        color: #78716c;
+        font-size: 12px;
+      }
 
-        .material-payment-item strong {
-            display: block;
-            color: #9a3412;
-            font-size: 17px;
-            overflow-wrap: anywhere;
-        }
+      .material-payment-item strong {
+        display: block;
+        color: #9a3412;
+        font-size: 17px;
+        overflow-wrap: anywhere;
+      }
 
-        .material-payment-item.balance {
-            grid-column: 1 / -1;
-            background: #f0fdf4;
-        }
+      .material-payment-item.balance {
+        grid-column: 1 / -1;
+        background: #f0fdf4;
+      }
 
-        .material-payment-item.balance strong {
-            color: #15803d;
-            font-size: 22px;
-        }
+      .material-payment-item.balance strong {
+        color: #15803d;
+        font-size: 22px;
+      }
 
-        .material-card-details {
-            display: none;
-            margin-top: 14px;
-            padding-top: 13px;
-            border-top: 1px solid #f0dfcc;
-        }
+      .material-card-details {
+        display: none;
+        margin-top: 14px;
+        padding-top: 13px;
+        border-top: 1px solid #f0dfcc;
+      }
 
-        .material-card-details.open {
-            display: block;
-        }
+      .material-card-details.open {
+        display: block;
+      }
 
-        .material-more-button {
-            width: 100%;
-            margin-top: 14px;
-        }
+      .material-more-button {
+        width: 100%;
+        margin-top: 14px;
+      }
 
-        /* ======================================
+      /* ======================================
            MODAL
         ====================================== */
 
-        .material-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-            background: rgba(28, 15, 7, 0.72);
-            overflow-y: auto;
+      .material-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        background: rgba(28, 15, 7, 0.72);
+        overflow-y: auto;
+      }
+
+      .material-modal.open {
+        display: flex;
+      }
+
+      .material-modal-dialog {
+        width: 100%;
+        max-width: 720px;
+        max-height: calc(100vh - 32px);
+        overflow-y: auto;
+        padding: 26px;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 20px 70px rgba(0, 0, 0, 0.25);
+        animation: materialModalOpen 0.2s ease;
+      }
+
+      @keyframes materialModalOpen {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
         }
 
-        .material-modal.open {
-            display: flex;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
+      }
 
-        .material-modal-dialog {
-            width: 100%;
-            max-width: 720px;
-            max-height: calc(100vh - 32px);
-            overflow-y: auto;
-            padding: 26px;
-            border-radius: 18px;
-            background: #ffffff;
-            box-shadow: 0 20px 70px rgba(0, 0, 0, 0.25);
-            animation: materialModalOpen 0.2s ease;
-        }
+      .material-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 22px;
+      }
 
-        @keyframes materialModalOpen {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
+      .material-modal-header h2 {
+        margin: 0 0 7px;
+        color: #9a3412;
+      }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+      .material-modal-header p {
+        margin: 0;
+        color: #78716c;
+        font-size: 14px;
+      }
 
-        .material-modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 16px;
-            margin-bottom: 22px;
-        }
+      .material-modal-close {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        border: 0;
+        border-radius: 50%;
+        background: #fff0e5;
+        color: #9a3412;
+        font-size: 26px;
+        cursor: pointer;
+      }
 
-        .material-modal-header h2 {
-            margin: 0 0 7px;
-            color: #9a3412;
-        }
+      .material-modal-close:hover {
+        background: #fed7aa;
+      }
 
-        .material-modal-header p {
-            margin: 0;
-            color: #78716c;
-            font-size: 14px;
-        }
+      .material-modal .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
 
-        .material-modal-close {
-            flex-shrink: 0;
-            width: 40px;
-            height: 40px;
-            border: 0;
-            border-radius: 50%;
-            background: #fff0e5;
-            color: #9a3412;
-            font-size: 26px;
-            cursor: pointer;
-        }
+      .material-modal .full {
+        grid-column: 1 / -1;
+      }
 
-        .material-modal-close:hover {
-            background: #fed7aa;
-        }
+      .material-modal label {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        font-size: 14px;
+        font-weight: 600;
+      }
 
-        .material-modal .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 16px;
-        }
+      .material-modal input,
+      .material-modal textarea {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        padding: 12px;
+        border: 1px solid #e7d5c4;
+        border-radius: 9px;
+        background: #fffdfb;
+        color: #292524;
+        font: inherit;
+      }
 
-        .material-modal .full {
-            grid-column: 1 / -1;
-        }
+      .material-modal input:focus,
+      .material-modal textarea:focus {
+        outline: 2px solid #fdba74;
+        border-color: #c2410c;
+      }
 
-        .material-modal label {
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-            font-size: 14px;
-            font-weight: 600;
-        }
+      .material-modal input[type="file"] {
+        padding: 9px;
+        font-size: 13px;
+      }
 
-        .material-modal input,
-        .material-modal textarea {
-            width: 100%;
-            min-width: 0;
-            box-sizing: border-box;
-            padding: 12px;
-            border: 1px solid #e7d5c4;
-            border-radius: 9px;
-            background: #fffdfb;
-            color: #292524;
-            font: inherit;
-        }
+      .material-modal .payment-preview {
+        padding: 17px;
+        border-radius: 12px;
+        background: #f0fdf4;
+      }
 
-        .material-modal input:focus,
-        .material-modal textarea:focus {
-            outline: 2px solid #fdba74;
-            border-color: #c2410c;
-        }
+      .payment-preview span,
+      .payment-preview small {
+        display: block;
+      }
 
-        .material-modal input[type="file"] {
-            padding: 9px;
-            font-size: 13px;
-        }
+      .payment-preview span {
+        color: #166534;
+        font-size: 14px;
+      }
 
-        .material-modal .payment-preview {
-            padding: 17px;
-            border-radius: 12px;
-            background: #f0fdf4;
-        }
+      .payment-preview strong {
+        display: block;
+        margin: 7px 0;
+        color: #15803d;
+        font-size: 28px;
+      }
 
-        .payment-preview span,
-        .payment-preview small {
-            display: block;
-        }
+      .payment-preview small {
+        color: #4b7a58;
+      }
 
-        .payment-preview span {
-            color: #166534;
-            font-size: 14px;
-        }
+      .material-modal .form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        margin-top: 5px;
+      }
 
-        .payment-preview strong {
-            display: block;
-            margin: 7px 0;
-            color: #15803d;
-            font-size: 28px;
-        }
+      .material-modal button:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
 
-        .payment-preview small {
-            color: #4b7a58;
-        }
-
-        .material-modal .form-actions {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 12px;
-            margin-top: 5px;
-        }
-
-        .material-modal button:disabled {
-            opacity: 0.65;
-            cursor: not-allowed;
-        }
-
-        /* ======================================
+      /* ======================================
            STATUS / PAGINATION
         ====================================== */
 
-        .material-empty {
-            grid-column: 1 / -1;
-            padding: 40px 20px;
-            border: 1px dashed #e7c6a5;
-            border-radius: 14px;
-            background: #fffaf5;
-            text-align: center;
-            color: #78716c;
-        }
+      .material-empty {
+        grid-column: 1 / -1;
+        padding: 40px 20px;
+        border: 1px dashed #e7c6a5;
+        border-radius: 14px;
+        background: #fffaf5;
+        text-align: center;
+        color: #78716c;
+      }
 
-        .material-empty-icon {
-            display: block;
-            margin-bottom: 12px;
-            font-size: 44px;
-        }
+      .material-empty-icon {
+        display: block;
+        margin-bottom: 12px;
+        font-size: 44px;
+      }
 
-        .material-loading {
-            grid-column: 1 / -1;
-            padding: 35px;
-            text-align: center;
-            color: #9a3412;
-        }
+      .material-loading {
+        grid-column: 1 / -1;
+        padding: 35px;
+        text-align: center;
+        color: #9a3412;
+      }
 
-        .material-error {
-            margin-bottom: 16px;
-            padding: 13px;
-            border-radius: 9px;
-            background: #fef2f2;
-            color: #b91c1c;
-            font-size: 14px;
-        }
+      .material-error {
+        margin-bottom: 16px;
+        padding: 13px;
+        border-radius: 9px;
+        background: #fef2f2;
+        color: #b91c1c;
+        font-size: 14px;
+      }
 
-        .material-success {
-            margin-bottom: 16px;
-            padding: 13px;
-            border-radius: 9px;
-            background: #f0fdf4;
-            color: #166534;
-            font-size: 14px;
-        }
+      .material-success {
+        margin-bottom: 16px;
+        padding: 13px;
+        border-radius: 9px;
+        background: #f0fdf4;
+        color: #166534;
+        font-size: 14px;
+      }
 
-        .material-pagination {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 25px;
-        }
+      .material-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 25px;
+      }
 
-        .material-pagination button {
-            min-width: 38px;
-            padding: 9px 12px;
-            border: 1px solid #e7d5c4;
-            border-radius: 8px;
-            background: #ffffff;
-            color: #7c2d12;
-            cursor: pointer;
-        }
+      .material-pagination button {
+        min-width: 38px;
+        padding: 9px 12px;
+        border: 1px solid #e7d5c4;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #7c2d12;
+        cursor: pointer;
+      }
 
-        .material-pagination button.active {
-            border-color: #9a3412;
-            background: #9a3412;
-            color: #ffffff;
-        }
+      .material-pagination button.active {
+        border-color: #9a3412;
+        background: #9a3412;
+        color: #ffffff;
+      }
 
-        .material-pagination button:disabled {
-            opacity: 0.45;
-            cursor: not-allowed;
-        }
+      .material-pagination button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
 
-        /* ======================================
+      /* ======================================
            FULL IMAGE VIEWER
         ====================================== */
 
-        .material-image-viewer {
-            position: fixed;
-            inset: 0;
-            z-index: 10001;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.93);
-        }
+      .material-image-viewer {
+        position: fixed;
+        inset: 0;
+        z-index: 10001;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.93);
+      }
 
-        .material-image-viewer.open {
-            display: flex;
-        }
+      .material-image-viewer.open {
+        display: flex;
+      }
 
-        .material-image-viewer img {
-            display: block;
-            max-width: 100%;
-            max-height: calc(100vh - 40px);
-            width: auto;
-            height: auto;
-            object-fit: contain;
-        }
+      .material-image-viewer img {
+        display: block;
+        max-width: 100%;
+        max-height: calc(100vh - 40px);
+        width: auto;
+        height: auto;
+        object-fit: contain;
+      }
 
-        .material-image-viewer-close {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            width: 45px;
-            height: 45px;
-            border: 0;
-            border-radius: 50%;
-            background: #ffffff;
-            color: #7c2d12;
-            font-size: 30px;
-            cursor: pointer;
-        }
+      .material-image-viewer-close {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        border: 0;
+        border-radius: 50%;
+        background: #ffffff;
+        color: #7c2d12;
+        font-size: 30px;
+        cursor: pointer;
+      }
 
-        /* ======================================
+      /* ======================================
            RESPONSIVE
         ====================================== */
 
-        @media (max-width: 1000px) {
-            .material-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
+      @media (max-width: 1000px) {
+        .material-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 600px) {
+        .material-grid {
+          grid-template-columns: 1fr;
         }
 
-        @media (max-width: 600px) {
-            .material-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .material-stats {
-                grid-template-columns: 1fr;
-            }
-
-            .material-modal-dialog {
-                padding: 19px;
-            }
-
-            .material-modal .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .material-modal .full {
-                grid-column: auto;
-            }
-
-            .material-toolbar > * {
-                width: 100%;
-            }
-
-            .material-image-wrapper {
-                max-height: 420px;
-            }
-
-            .material-image {
-                max-height: 400px;
-            }
+        .material-stats {
+          grid-template-columns: 1fr;
         }
+
+        .material-modal-dialog {
+          padding: 19px;
+        }
+
+        .material-modal .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .material-modal .full {
+          grid-column: auto;
+        }
+
+        .material-toolbar > * {
+          width: 100%;
+        }
+
+        .material-image-wrapper {
+          max-height: 420px;
+        }
+
+        .material-image {
+          max-height: 400px;
+        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
-
+  <body>
     <!-- Navigation -->
     <header class="site-header">
-        <div class="container nav-wrap">
+      <div class="container nav-wrap">
+        <a class="brand" href="index.html">
+          <span class="brand-icon">☀</span>
 
-            <a class="brand" href="index.html">
-                <span class="brand-icon">☀</span>
+          <span>
+            <strong>छठ पूजा समिति</strong>
+            <small>आस्था • सेवा • सहयोग</small>
+          </span>
+        </a>
 
-                <span>
-                    <strong>छठ पूजा समिति</strong>
-                    <small>आस्था • सेवा • सहयोग</small>
-                </span>
-            </a>
+        <button
+          class="menu-toggle"
+          type="button"
+          aria-label="मेन्यू खोलें"
+          aria-expanded="false"
+        >
+          ☰
+        </button>
 
-            <button
-                class="menu-toggle"
-                type="button"
-                aria-label="मेन्यू खोलें"
-                aria-expanded="false">
-                ☰
-            </button>
-
-            <nav class="nav-links">
-                <a href="index.html">मुख्य पृष्ठ</a>
-                <a href="chanda.html">चंदा सूची</a>
-                <a class="active" href="materials.html">
-                    सामग्री/खरीद सूची
-                </a>
-            </nav>
-
-        </div>
+        <nav class="nav-links">
+          <a href="index.html">मुख्य पृष्ठ</a>
+          <a href="chanda.html">चंदा सूची</a>
+          <a class="active" href="materials.html"> सामग्री/खरीद सूची </a>
+        </nav>
+      </div>
     </header>
 
     <main class="container page-main">
+      <!-- Heading -->
+      <section class="page-title">
+        <span class="eyebrow dark">पूजा की तैयारी</span>
 
-        <!-- Heading -->
-        <section class="page-title">
-            <span class="eyebrow dark">पूजा की तैयारी</span>
+        <h1>🪔 सामग्री / खरीद सूची</h1>
 
-            <h1>🪔 सामग्री / खरीद सूची</h1>
+        <p>
+          छठ पूजा के लिए खरीदी गई सामग्री, भुगतान और बाकी रकम का साझा हिसाब।
+        </p>
+      </section>
 
-            <p>
-                छठ पूजा के लिए खरीदी गई सामग्री, भुगतान और बाकी रकम
-                का साझा हिसाब।
+      <!-- Summary -->
+      <section class="material-stats">
+        <div class="material-stat">
+          <span>कुल सामग्री रिकॉर्ड</span>
+          <strong id="material-total-count">0</strong>
+        </div>
+
+        <div class="material-stat">
+          <span>कुल खरीद रकम</span>
+          <strong id="material-total-amount">₹0</strong>
+        </div>
+
+        <div class="material-stat">
+          <span>कुल बाकी भुगतान</span>
+          <strong id="material-total-balance">₹0</strong>
+        </div>
+      </section>
+
+      <!-- Material list -->
+      <section class="list-section">
+        <div class="material-toolbar">
+          <div>
+            <span class="eyebrow dark"> सभी सामग्री रिकॉर्ड </span>
+
+            <h2>खरीद और खर्च की सूची</h2>
+
+            <p id="material-summary" class="material-summary">
+              रिकॉर्ड लोड हो रहे हैं...
             </p>
-        </section>
+          </div>
 
-        <!-- Summary -->
-        <section class="material-stats">
+          <button
+            id="open-material-modal"
+            class="btn btn-primary"
+            type="button"
+            style="display: none;"
+          >
+            ➕ नई सामग्री जोड़ें
+          </button>
+        </div>
 
-            <div class="material-stat">
-                <span>कुल सामग्री रिकॉर्ड</span>
-                <strong id="material-total-count">0</strong>
-            </div>
+        <div class="toolbar">
+          <input
+            id="material-search"
+            type="search"
+            placeholder="सामग्री के नाम या विवरण से खोजें..."
+            aria-label="सामग्री सूची खोजें"
+          />
 
-            <div class="material-stat">
-                <span>कुल खरीद रकम</span>
-                <strong id="material-total-amount">₹0</strong>
-            </div>
+          <button id="export-materials" class="btn btn-secondary" type="button">
+            JSON डाउनलोड करें
+          </button>
+        </div>
 
-            <div class="material-stat">
-                <span>कुल बाकी भुगतान</span>
-                <strong id="material-total-balance">₹0</strong>
-            </div>
+        <div id="material-list" class="material-grid" aria-live="polite">
+          <div class="material-loading">सामग्री सूची लोड हो रही है...</div>
+        </div>
 
-        </section>
-
-        <!-- Material list -->
-        <section class="list-section">
-
-            <div class="material-toolbar">
-
-                <div>
-                    <span class="eyebrow dark">
-                        सभी सामग्री रिकॉर्ड
-                    </span>
-
-                    <h2>खरीद और खर्च की सूची</h2>
-
-                    <p
-                        id="material-summary"
-                        class="material-summary">
-                        रिकॉर्ड लोड हो रहे हैं...
-                    </p>
-                </div>
-
-                <button
-                    id="open-material-modal"
-                    class="btn btn-primary"
-                    type="button">
-                    ➕ नई सामग्री जोड़ें
-                </button>
-
-            </div>
-
-            <div class="toolbar">
-
-                <input
-                    id="material-search"
-                    type="search"
-                    placeholder="सामग्री के नाम या विवरण से खोजें..."
-                    aria-label="सामग्री सूची खोजें">
-
-                <button
-                    id="export-materials"
-                    class="btn btn-secondary"
-                    type="button">
-                    JSON डाउनलोड करें
-                </button>
-
-            </div>
-
-            <div
-                id="material-list"
-                class="material-grid"
-                aria-live="polite">
-
-                <div class="material-loading">
-                    सामग्री सूची लोड हो रही है...
-                </div>
-
-            </div>
-
-            <div
-                id="material-pagination"
-                class="material-pagination">
-            </div>
-
-        </section>
-
+        <div id="material-pagination" class="material-pagination"></div>
+      </section>
     </main>
 
     <!-- ======================================
          ADD MATERIAL MODAL
     ======================================= -->
 
-    <div
-        id="material-modal"
-        class="material-modal"
-        aria-hidden="true">
+    <div id="material-modal" class="material-modal" aria-hidden="true">
+      <div
+        class="material-modal-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="material-modal-title"
+      >
+        <div class="material-modal-header">
+          <div>
+            <h2 id="material-modal-title">➕ नई सामग्री जोड़ें</h2>
 
-        <div
-            class="material-modal-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="material-modal-title">
+            <p>सामग्री, फोटो और भुगतान का विवरण भरें।</p>
+          </div>
 
-            <div class="material-modal-header">
-
-                <div>
-                    <h2 id="material-modal-title">
-                        ➕ नई सामग्री जोड़ें
-                    </h2>
-
-                    <p>
-                        सामग्री, फोटो और भुगतान का विवरण भरें।
-                    </p>
-                </div>
-
-                <button
-                    id="close-material-modal"
-                    class="material-modal-close"
-                    type="button"
-                    aria-label="फॉर्म बंद करें">
-                    ×
-                </button>
-
-            </div>
-
-            <div
-                id="material-form-message"
-                role="status"
-                style="display:none;">
-            </div>
-
-            <form id="material-form" class="form-grid">
-
-                <label>
-                    सामग्री का नाम *
-                    <input
-                        name="material_name"
-                        type="text"
-                        required
-                        maxlength="150"
-                        placeholder="जैसे: बाँस का सूप">
-                </label>
-
-                <label>
-                    कुल रकम (₹) *
-                    <input
-                        name="total_amount"
-                        type="number"
-                        required
-                        min="0"
-                        step="0.01"
-                        placeholder="जैसे: 2500">
-                </label>
-
-                <label class="full">
-                    संक्षिप्त विवरण
-                    <input
-                        name="description"
-                        type="text"
-                        maxlength="250"
-                        placeholder="जैसे: पूजा के लिए 10 सूप">
-                </label>
-
-                <label class="full">
-                    विस्तृत विवरण
-                    <textarea
-                        name="details_description"
-                        rows="4"
-                        maxlength="2000"
-                        placeholder="मात्रा, दुकानदार, खरीद की तारीख या अन्य जानकारी"></textarea>
-                </label>
-
-                <label>
-                    अग्रिम भुगतान (₹)
-                    <input
-                        name="advance_paid"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value="0">
-                </label>
-
-                <label>
-                    सामग्री की फोटो
-                    <input
-                        name="image"
-                        type="file"
-                        accept="image/*">
-
-                    <small>
-                        JPG, PNG, WEBP सहित सामान्य image formats।
-                        अधिकतम 5 MB।
-                    </small>
-                </label>
-
-                <div class="full payment-preview">
-                    <span>बाकी भुगतान</span>
-
-                    <strong id="balance-preview">₹0.00</strong>
-
-                    <small>
-                        कुल रकम − अग्रिम भुगतान
-                    </small>
-                </div>
-
-                <div class="form-actions full">
-
-                    <button
-                        id="save-material"
-                        class="btn btn-primary"
-                        type="submit">
-                        सामग्री सेव करें
-                    </button>
-
-                    <button
-                        id="cancel-material"
-                        class="btn btn-secondary"
-                        type="button">
-                        रद्द करें
-                    </button>
-
-                </div>
-
-                <p class="full form-note">
-                    * जरूरी जानकारी
-                </p>
-
-            </form>
-
+          <button
+            id="close-material-modal"
+            class="material-modal-close"
+            type="button"
+            aria-label="फॉर्म बंद करें"
+          >
+            ×
+          </button>
         </div>
 
+        <div
+          id="material-form-message"
+          role="status"
+          style="display: none"
+        ></div>
+
+        <form id="material-form" class="form-grid">
+          <label>
+            सामग्री का नाम *
+            <input
+              name="material_name"
+              type="text"
+              required
+              maxlength="150"
+              placeholder="जैसे: बाँस का सूप"
+            />
+          </label>
+
+          <label>
+            कुल रकम (₹) *
+            <input
+              name="total_amount"
+              type="number"
+              required
+              min="0"
+              step="0.01"
+              placeholder="जैसे: 2500"
+            />
+          </label>
+
+          <label class="full">
+            संक्षिप्त विवरण
+            <input
+              name="description"
+              type="text"
+              maxlength="250"
+              placeholder="जैसे: पूजा के लिए 10 सूप"
+            />
+          </label>
+
+          <label class="full">
+            विस्तृत विवरण
+            <textarea
+              name="details_description"
+              rows="4"
+              maxlength="2000"
+              placeholder="मात्रा, दुकानदार, खरीद की तारीख या अन्य जानकारी"
+            ></textarea>
+          </label>
+
+          <label>
+            अग्रिम भुगतान (₹)
+            <input
+              name="advance_paid"
+              type="number"
+              min="0"
+              step="0.01"
+              value="0"
+            />
+          </label>
+
+          <label>
+            सामग्री की फोटो
+            <input name="image" type="file" accept="image/*" />
+
+            <small>
+              JPG, PNG, WEBP सहित सामान्य image formats। अधिकतम 5 MB।
+            </small>
+          </label>
+
+          <div class="full payment-preview">
+            <span>बाकी भुगतान</span>
+
+            <strong id="balance-preview">₹0.00</strong>
+
+            <small> कुल रकम − अग्रिम भुगतान </small>
+          </div>
+
+          <div class="form-actions full">
+            <button id="save-material" class="btn btn-primary" type="submit">
+              सामग्री सेव करें
+            </button>
+
+            <button
+              id="cancel-material"
+              class="btn btn-secondary"
+              type="button"
+            >
+              रद्द करें
+            </button>
+          </div>
+
+          <p class="full form-note">* जरूरी जानकारी</p>
+        </form>
+      </div>
     </div>
 
     <!-- ======================================
@@ -825,37 +777,32 @@
     ======================================= -->
 
     <div
-        id="material-image-viewer"
-        class="material-image-viewer"
-        aria-hidden="true">
+      id="material-image-viewer"
+      class="material-image-viewer"
+      aria-hidden="true"
+    >
+      <button
+        id="close-material-image"
+        class="material-image-viewer-close"
+        type="button"
+        aria-label="फोटो बंद करें"
+      >
+        ×
+      </button>
 
-        <button
-            id="close-material-image"
-            class="material-image-viewer-close"
-            type="button"
-            aria-label="फोटो बंद करें">
-            ×
-        </button>
-
-        <img
-            id="material-full-image"
-            src=""
-            alt="सामग्री की पूरी फोटो">
-
+      <img id="material-full-image" src="" alt="सामग्री की पूरी फोटो" />
     </div>
 
     <!-- Footer -->
     <footer class="site-footer">
-        <div class="container footer-inner">
-
-            <div>
-                <strong>☀ छठ पूजा समिति</strong>
-                <p>छठी मैया की कृपा सभी पर बनी रहे।</p>
-            </div>
-
-            <p>साझा हिसाब • पारदर्शी सहयोग</p>
-
+      <div class="container footer-inner">
+        <div>
+          <strong>☀ छठ पूजा समिति</strong>
+          <p>छठी मैया की कृपा सभी पर बनी रहे।</p>
         </div>
+
+        <p>साझा हिसाब • पारदर्शी सहयोग</p>
+      </div>
     </footer>
 
     <div id="toast" class="toast" role="status"></div>
@@ -866,7 +813,5 @@
     <script src="assets/js/config.js"></script>
     <script src="assets/js/common.js"></script>
     <script src="assets/js/materials.js"></script>
-
-</body>
-
+  </body>
 </html>

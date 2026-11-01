@@ -1321,3 +1321,227 @@
     }, 30000);
 
 })();
+
+// ==========================================
+// ADMIN LOGIN SESSION - MATERIAL BUTTON
+// ==========================================
+
+(function () {
+    "use strict";
+
+    const ADMIN_SESSION_KEY = "chhath_admin_mobile";
+
+    const materialButton = document.getElementById(
+        "open-material-modal"
+    );
+
+    if (!materialButton) {
+        return;
+    }
+
+    // ==========================================
+    // SHOW / HIDE MATERIAL BUTTON
+    // ==========================================
+
+    function updateMaterialButton(isLoggedIn) {
+        materialButton.style.display = isLoggedIn
+            ? "inline-flex"
+            : "none";
+
+        materialButton.disabled = !isLoggedIn;
+
+        materialButton.setAttribute(
+            "aria-hidden",
+            String(!isLoggedIn)
+        );
+    }
+
+    // ==========================================
+    // CHECK AUTHORIZATION RESPONSE
+    // ==========================================
+
+    function isAuthorizedResponse(data) {
+        return (
+            data === true ||
+            data === "true" ||
+            (
+                Array.isArray(data) &&
+                data.length > 0 &&
+                (
+                    data[0] === true ||
+                    data[0] === "true" ||
+                    data[0]?.check_authorized_mobile === true ||
+                    data[0]?.check_authorized_mobile === "true"
+                )
+            )
+        );
+    }
+
+    // ==========================================
+    // GET SUPABASE CLIENT
+    // ==========================================
+
+    function getAuthClient() {
+        // First, use the existing database client.
+        if (
+            window.db &&
+            typeof window.db.rpc === "function"
+        ) {
+            return window.db;
+        }
+
+        // Otherwise, use the existing Supabase client.
+        if (
+            window.supabaseClient &&
+            typeof window.supabaseClient.rpc === "function"
+        ) {
+            return window.supabaseClient;
+        }
+
+        // If necessary, create a new Supabase client.
+        if (
+            window.supabase &&
+            typeof window.supabase.createClient === "function" &&
+            window.SUPABASE_URL &&
+            window.SUPABASE_ANON_KEY &&
+            !String(window.SUPABASE_URL).includes("PASTE_") &&
+            !String(window.SUPABASE_ANON_KEY).includes("PASTE_")
+        ) {
+            window.supabaseClient =
+                window.supabase.createClient(
+                    window.SUPABASE_URL,
+                    window.SUPABASE_ANON_KEY
+                );
+
+            return window.supabaseClient;
+        }
+
+        return null;
+    }
+
+    // ==========================================
+    // VERIFY ADMIN LOGIN
+    // ==========================================
+
+    let checkingSession = false;
+
+    async function checkAdminSession() {
+        if (checkingSession) {
+            return;
+        }
+
+        const mobile = sessionStorage.getItem(
+            ADMIN_SESSION_KEY
+        );
+
+        // If no valid mobile number is saved, hide the button.
+        if (
+            !mobile ||
+            !/^[0-9]{10}$/.test(mobile)
+        ) {
+            updateMaterialButton(false);
+            return;
+        }
+
+        const client = getAuthClient();
+
+        // Hide the button if Supabase is not configured.
+        if (
+            !client ||
+            typeof client.rpc !== "function"
+        ) {
+            console.error(
+                "Admin button: Supabase client/config not found. " +
+                "Please check assets/js/config.js."
+            );
+
+            updateMaterialButton(false);
+            return;
+        }
+
+        checkingSession = true;
+
+        try {
+            // Verify the mobile number against the authorized list.
+            const { data, error } = await client.rpc(
+                "check_authorized_mobile",
+                {
+                    input_mobile: mobile
+                }
+            );
+
+            if (error) {
+                throw error;
+            }
+
+            const authorized =
+                isAuthorizedResponse(data);
+
+            // Show the button only for an authorized admin.
+            updateMaterialButton(authorized);
+
+            // Remove the saved mobile number if unauthorized.
+            if (!authorized) {
+                sessionStorage.removeItem(
+                    ADMIN_SESSION_KEY
+                );
+            }
+
+        } catch (error) {
+            console.error(
+                "Admin session check failed:",
+                error
+            );
+
+            updateMaterialButton(false);
+
+        } finally {
+            checkingSession = false;
+        }
+    }
+
+    // ==========================================
+    // LISTEN FOR LOGIN / LOGOUT EVENTS
+    // ==========================================
+
+    window.addEventListener(
+        "chhath-admin-login-changed",
+        function (event) {
+            if (event.detail?.loggedIn === true) {
+                checkAdminSession();
+
+            } else if (
+                event.detail?.loggedIn === false
+            ) {
+                sessionStorage.removeItem(
+                    ADMIN_SESSION_KEY
+                );
+
+                updateMaterialButton(false);
+            }
+        }
+    );
+
+    // ==========================================
+    // INITIAL CHECK
+    // ==========================================
+
+    // Keep the button hidden until authorization is verified.
+    updateMaterialButton(false);
+
+    // Check the saved admin session when the page loads.
+    checkAdminSession();
+
+    // Verify again when the browser tab becomes active.
+    document.addEventListener(
+        "visibilitychange",
+        function () {
+            if (
+                document.visibilityState === "visible"
+            ) {
+                checkAdminSession();
+            }
+        }
+    );
+
+})();
