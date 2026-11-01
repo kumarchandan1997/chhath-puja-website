@@ -1,29 +1,677 @@
 <!doctype html>
 <html lang="hi">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#9a3412"><title>चंदा सूची | छठ पूजा समिति</title><link rel="stylesheet" href="assets/css/style.css"></head>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#9a3412">
+
+    <title>चंदा सूची | छठ पूजा समिति</title>
+
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <!-- Modal और चंदा कार्ड की अतिरिक्त CSS -->
+    <style>
+        .donation-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .donation-toolbar .btn {
+            white-space: nowrap;
+        }
+
+        .donation-cards {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .donation-card {
+            overflow: hidden;
+            border: 1px solid #f0dfcc;
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 5px 20px rgba(100, 45, 10, 0.07);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .donation-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 28px rgba(100, 45, 10, 0.12);
+        }
+
+        .donation-image {
+            width: 100%;
+            height: 210px;
+            display: block;
+            object-fit: cover;
+            background: #fff4e6;
+        }
+
+        .donation-image-placeholder {
+            height: 210px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            background: linear-gradient(135deg, #fff7ed, #ffedd5);
+        }
+
+        .donation-card-body {
+            padding: 18px;
+        }
+
+        .donation-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .donation-card h3 {
+            margin: 0;
+            font-size: 19px;
+            color: #7c2d12;
+            overflow-wrap: anywhere;
+        }
+
+        .donation-rank {
+            flex-shrink: 0;
+            padding: 5px 9px;
+            background: #fff0c2;
+            color: #854d0e;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .donation-amount {
+            margin: 14px 0;
+            color: #15803d;
+            font-size: 28px;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+        }
+
+        .donation-info {
+            margin: 8px 0;
+            color: #57534e;
+            font-size: 14px;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+        }
+
+        .donation-details {
+            display: none;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid #f0dfcc;
+        }
+
+        .donation-details.open {
+            display: block;
+        }
+
+        .donation-more {
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .donation-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: rgba(28, 15, 7, 0.68);
+            overflow-y: auto;
+        }
+
+        .donation-modal.open {
+            display: flex;
+        }
+
+        .donation-modal-dialog {
+            position: relative;
+            width: 100%;
+            max-width: 680px;
+            max-height: calc(100vh - 32px);
+            overflow-y: auto;
+            padding: 26px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 20px 70px rgba(0, 0, 0, 0.25);
+            animation: donationModalOpen 0.2s ease;
+        }
+
+        @keyframes donationModalOpen {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .donation-modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .donation-modal-header h2 {
+            margin: 0 0 6px;
+            color: #9a3412;
+        }
+
+        .donation-modal-header p {
+            margin: 0;
+            color: #78716c;
+            font-size: 14px;
+        }
+
+        .donation-modal-close {
+            flex-shrink: 0;
+            width: 38px;
+            height: 38px;
+            border: 0;
+            border-radius: 50%;
+            background: #fff0e5;
+            color: #9a3412;
+            font-size: 25px;
+            cursor: pointer;
+        }
+
+        .donation-modal-close:hover {
+            background: #fed7aa;
+        }
+
+        .donation-modal .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .donation-modal .full {
+            grid-column: 1 / -1;
+        }
+
+        .donation-modal label {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .donation-modal input,
+        .donation-modal textarea {
+            width: 100%;
+            min-width: 0;
+            padding: 12px;
+            border: 1px solid #e7d5c4;
+            border-radius: 9px;
+            background: #fffdfb;
+            color: #292524;
+            font: inherit;
+            box-sizing: border-box;
+        }
+
+        .donation-modal input:focus,
+        .donation-modal textarea:focus {
+            outline: 2px solid #fdba74;
+            border-color: #c2410c;
+        }
+
+        .donation-modal .form-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+        .donation-modal button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .donation-empty {
+            padding: 40px 20px;
+            text-align: center;
+            border: 1px dashed #e7c6a5;
+            border-radius: 14px;
+            background: #fffaf5;
+            color: #78716c;
+            grid-column: 1 / -1;
+        }
+
+        .donation-empty .empty-icon {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 42px;
+        }
+
+        .donation-error {
+            margin: 14px 0;
+            padding: 12px;
+            border-radius: 9px;
+            background: #fef2f2;
+            color: #b91c1c;
+            font-size: 14px;
+        }
+
+        .donation-success {
+            margin: 14px 0;
+            padding: 12px;
+            border-radius: 9px;
+            background: #f0fdf4;
+            color: #166534;
+            font-size: 14px;
+        }
+
+        .donation-loading {
+            padding: 35px;
+            text-align: center;
+            color: #9a3412;
+            grid-column: 1 / -1;
+        }
+
+        .donation-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .donation-pagination button {
+            min-width: 38px;
+            padding: 9px 12px;
+            border: 1px solid #e7d5c4;
+            border-radius: 8px;
+            background: white;
+            color: #7c2d12;
+            cursor: pointer;
+        }
+
+        .donation-pagination button.active {
+            background: #9a3412;
+            color: white;
+            border-color: #9a3412;
+        }
+
+        .donation-pagination button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .donation-summary {
+            color: #78716c;
+            font-size: 14px;
+        }
+
+        .donation-total-panel {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .donation-stat {
+            padding: 18px;
+            border: 1px solid #f0dfcc;
+            border-radius: 13px;
+            background: linear-gradient(135deg, #fffaf5, #fff0db);
+        }
+
+        .donation-stat span {
+            display: block;
+            margin-bottom: 8px;
+            color: #78716c;
+            font-size: 13px;
+        }
+
+        .donation-stat strong {
+            color: #9a3412;
+            font-size: 22px;
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 900px) {
+            .donation-cards {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            .donation-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .donation-total-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .donation-modal-dialog {
+                padding: 19px;
+            }
+
+            .donation-modal .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .donation-modal .full {
+                grid-column: auto;
+            }
+
+            .donation-image,
+            .donation-image-placeholder {
+                height: 230px;
+            }
+
+            .donation-toolbar {
+                align-items: stretch;
+            }
+
+            .donation-toolbar > * {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
 <body>
-<header class="site-header"><div class="container nav-wrap"><a class="brand" href="index.html"><span class="brand-icon">☀</span><span><strong>छठ पूजा समिति</strong><small>आस्था • सेवा • सहयोग</small></span></a><button class="menu-toggle" aria-label="मेन्यू खोलें" aria-expanded="false">☰</button><nav class="nav-links"><a href="index.html">मुख्य पृष्ठ</a><a class="active" href="chanda.html">चंदा सूची</a><a href="materials.html">सामग्री/खरीद सूची</a></nav></div></header>
-<main class="container page-main">
-  <div class="page-title"><span class="eyebrow dark">साझा चंदा रजिस्टर</span><h1>चंदा सूची</h1><p>यहाँ जो रिकॉर्ड जोड़ा जाएगा, वह दूसरे मोबाइल पर भी दिखाई देगा।</p></div>
-  <section class="form-panel">
-    <div class="panel-heading"><div><h2>➕ नया चंदा जोड़ें</h2><p>कृपया सही जानकारी भरें।</p></div><span class="pill">दान विवरण</span></div>
-    <form id="donation-form" class="form-grid">
-      <label>दानदाता का नाम *<input name="name" required maxlength="120" placeholder="जैसे: राम कुमार"></label>
-      <label>मोबाइल नंबर<input name="mobile" inputmode="tel" maxlength="20" placeholder="मोबाइल नंबर"></label>
-      <label class="full">पता<input name="address" maxlength="250" placeholder="गाँव / मोहल्ला / पता"></label>
-      <label>चंदा राशि (₹) *<input name="amount" required type="number" min="1" step="0.01" placeholder="जैसे: 1100"></label>
-      <label>फोटो (वैकल्पिक)<input name="image" type="file" accept="image/*"></label>
-      <label class="full">टिप्पणी / रिमार्क<textarea name="remarks" rows="3" maxlength="1000" placeholder="कोई अतिरिक्त जानकारी"></textarea></label>
-      <div class="form-actions full"><button class="btn btn-primary" type="submit">चंदा सेव करें</button><span class="form-note">* जरूरी जानकारी</span></div>
-    </form>
-  </section>
-  <section class="list-section">
-    <div class="section-heading"><div><span class="eyebrow dark">सभी रिकॉर्ड</span><h2>दानदाताओं की सूची</h2></div><button id="export-donations" class="btn btn-secondary" type="button">JSON डाउनलोड करें</button></div>
-    <div class="toolbar"><input id="donation-search" type="search" placeholder="नाम, मोबाइल या पते से खोजें…" aria-label="चंदा सूची खोजें"><span id="donation-summary" class="muted">लोड हो रहा है…</span></div>
-    <div id="donation-list" class="record-list"><div class="empty-state">डेटा लोड हो रहा है…</div></div>
-    <div id="donation-pagination" class="pagination"></div>
-  </section>
-</main>
-<footer class="site-footer"><div class="container footer-inner"><div><strong>☀ छठ पूजा समिति</strong><p>छठी मैया की कृपा सभी पर बनी रहे।</p></div><p>साझा हिसाब • पारदर्शी सहयोग</p></div></footer><div id="toast" class="toast" role="status"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/js/config.js"></script><script src="assets/js/common.js"></script><script src="assets/js/chanda.js"></script>
-</body></html>
+
+    <!-- Navigation -->
+    <header class="site-header">
+        <div class="container nav-wrap">
+
+            <a class="brand" href="index.html">
+                <span class="brand-icon">☀</span>
+
+                <span>
+                    <strong>छठ पूजा समिति</strong>
+                    <small>आस्था • सेवा • सहयोग</small>
+                </span>
+            </a>
+
+            <button
+                class="menu-toggle"
+                aria-label="मेन्यू खोलें"
+                aria-expanded="false"
+                type="button">
+                ☰
+            </button>
+
+            <nav class="nav-links">
+                <a href="index.html">मुख्य पृष्ठ</a>
+                <a class="active" href="chanda.html">चंदा सूची</a>
+                <a href="materials.html">सामग्री/खरीद सूची</a>
+            </nav>
+
+        </div>
+    </header>
+
+    <main class="container page-main">
+
+        <!-- Page heading -->
+        <section class="page-title">
+            <span class="eyebrow dark">साझा चंदा रजिस्टर</span>
+
+            <h1>🙏 चंदा सूची</h1>
+
+            <p>
+                छठ पूजा के लिए सहयोग करने वाले सभी दानदाताओं का विवरण।
+                अधिक राशि देने वाले दानदाता पहले दिखाई देंगे।
+            </p>
+        </section>
+
+        <!-- Summary -->
+        <section class="donation-total-panel">
+
+            <div class="donation-stat">
+                <span>कुल दानदाता</span>
+                <strong id="total-donors">0</strong>
+            </div>
+
+            <div class="donation-stat">
+                <span>कुल चंदा राशि</span>
+                <strong id="total-donation">₹0</strong>
+            </div>
+
+            <div class="donation-stat">
+                <span>सबसे अधिक चंदा</span>
+                <strong id="highest-donation">₹0</strong>
+            </div>
+
+        </section>
+
+        <!-- Donation list -->
+        <section class="list-section">
+
+            <div class="donation-toolbar">
+
+                <div>
+                    <span class="eyebrow dark">सभी रिकॉर्ड</span>
+                    <h2>दानदाताओं की सूची</h2>
+                    <p class="donation-summary" id="donation-summary">
+                        रिकॉर्ड लोड हो रहे हैं...
+                    </p>
+                </div>
+
+                <button
+                    id="open-donation-modal"
+                    class="btn btn-primary"
+                    type="button">
+                    ➕ नया चंदा जोड़ें
+                </button>
+
+            </div>
+
+            <div class="toolbar">
+
+                <input
+                    id="donation-search"
+                    type="search"
+                    placeholder="नाम, मोबाइल या पते से खोजें..."
+                    aria-label="चंदा सूची खोजें">
+
+                <button
+                    id="export-donations"
+                    class="btn btn-secondary"
+                    type="button">
+                    JSON डाउनलोड करें
+                </button>
+
+            </div>
+
+            <div
+                id="donation-list"
+                class="donation-cards"
+                aria-live="polite">
+
+                <div class="donation-loading">
+                    चंदा सूची लोड हो रही है...
+                </div>
+
+            </div>
+
+            <div
+                id="donation-pagination"
+                class="donation-pagination">
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Add Donation Modal -->
+    <div
+        id="donation-modal"
+        class="donation-modal"
+        aria-hidden="true">
+
+        <div
+            class="donation-modal-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="donation-modal-title">
+
+            <div class="donation-modal-header">
+
+                <div>
+                    <h2 id="donation-modal-title">
+                        ➕ नया चंदा जोड़ें
+                    </h2>
+
+                    <p>
+                        दानदाता की सही जानकारी भरें।
+                    </p>
+                </div>
+
+                <button
+                    id="close-donation-modal"
+                    class="donation-modal-close"
+                    type="button"
+                    aria-label="फॉर्म बंद करें">
+                    ×
+                </button>
+
+            </div>
+
+            <div id="donation-form-message" role="status"></div>
+
+            <form id="donation-form" class="form-grid">
+
+                <label>
+                    दानदाता का नाम *
+                    <input
+                        name="name"
+                        type="text"
+                        required
+                        maxlength="120"
+                        placeholder="जैसे: राम कुमार">
+                </label>
+
+                <label>
+                    मोबाइल नंबर
+                    <input
+                        name="mobile"
+                        type="tel"
+                        inputmode="tel"
+                        maxlength="20"
+                        placeholder="मोबाइल नंबर">
+                </label>
+
+                <label class="full">
+                    पता
+                    <input
+                        name="address"
+                        type="text"
+                        maxlength="250"
+                        placeholder="गाँव / मोहल्ला / पता">
+                </label>
+
+                <label>
+                    चंदा राशि (₹) *
+                    <input
+                        name="amount"
+                        type="number"
+                        required
+                        min="1"
+                        step="0.01"
+                        placeholder="जैसे: 1100">
+                </label>
+
+                <label>
+                    दानदाता की फोटो
+                    <input
+                        name="image"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif">
+                    <small>अधिकतम 5 MB की फोटो चुनें।</small>
+                </label>
+
+                <label class="full">
+                    टिप्पणी / रिमार्क
+                    <textarea
+                        name="remarks"
+                        rows="3"
+                        maxlength="1000"
+                        placeholder="कोई अतिरिक्त जानकारी">
+                    </textarea>
+                </label>
+
+                <div class="form-actions full">
+
+                    <button
+                        id="save-donation"
+                        class="btn btn-primary"
+                        type="submit">
+                        चंदा सेव करें
+                    </button>
+
+                    <button
+                        id="cancel-donation"
+                        class="btn btn-secondary"
+                        type="button">
+                        रद्द करें
+                    </button>
+
+                </div>
+
+                <p class="full form-note">
+                    * जरूरी जानकारी
+                </p>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container footer-inner">
+
+            <div>
+                <strong>☀ छठ पूजा समिति</strong>
+                <p>छठी मैया की कृपा सभी पर बनी रहे।</p>
+            </div>
+
+            <p>साझा हिसाब • पारदर्शी सहयोग</p>
+
+        </div>
+    </footer>
+
+    <div id="toast" class="toast" role="status"></div>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Project configuration -->
+    <script src="assets/js/config.js"></script>
+
+    <!-- Shared website code -->
+    <script src="assets/js/common.js"></script>
+
+    <!-- Donation page -->
+    <script src="assets/js/chanda.js"></script>
+
+</body>
+
+</html>
