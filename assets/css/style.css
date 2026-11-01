@@ -657,6 +657,54 @@ select {
     font-weight: 900;
 }
 
+.donor-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    padding: 18px 12px;
+
+    text-align: center;
+}
+
+.donor-details h3 {
+    width: 100%;
+    margin: 0 0 12px;
+
+    color: var(--primary-dark);
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.5;
+
+    text-align: center;
+}
+
+.donor-details .donor-message {
+    width: 100%;
+    margin: 0 0 14px;
+
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.7;
+
+    text-align: center;
+}
+
+.donor-details .donation-amount {
+    display: block;
+    width: 100%;
+    margin: 0;
+
+    color: var(--primary);
+    font-size: 22px;
+    font-weight: 900;
+
+    text-align: center;
+}
+
+
 /* Full image: no cropping */
 
 .donor-image-wrapper {
