@@ -1111,5 +1111,231 @@
         window.refreshFinanceSummary = loadFinanceSummary;
       })();
     </script>
+  
+
+    <!-- =============================================
+         DONOR PHOTO DISPLAY + CLICK TO ZOOM
+         Entire photo remains visible; blurred background fills empty space.
+    ============================================== -->
+    <style>
+      #top-donors .donor-image-wrapper {
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        height: clamp(230px, 28vw, 300px) !important;
+        min-height: 230px !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+        background: linear-gradient(145deg, #fff7ed, #ffedd5) !important;
+        isolation: isolate;
+        cursor: zoom-in;
+      }
+
+      /* Blurred image fills the card background, while foreground photo is never cropped. */
+      #top-donors .donor-image-wrapper::before {
+        content: "";
+        position: absolute;
+        inset: -18px;
+        z-index: -1;
+        background-image: var(--donor-photo-bg, none);
+        background-position: center;
+        background-size: cover;
+        filter: blur(18px);
+        opacity: .42;
+        transform: scale(1.08);
+      }
+
+      #top-donors .donor-image-wrapper img,
+      #top-donors img.donor-image {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        object-fit: contain !important;
+        object-position: center center !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        cursor: zoom-in;
+        transition: transform .2s ease;
+      }
+      #top-donors .donor-image-wrapper:hover img { transform: scale(1.015); }
+
+      #top-donors .donor-default-avatar {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 9px !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 230px !important;
+        box-sizing: border-box !important;
+        padding: 20px !important;
+        color: #9a3412 !important;
+        background: linear-gradient(145deg, #fff7ed, #ffedd5) !important;
+        text-align: center !important;
+        cursor: default;
+      }
+      #top-donors .donor-default-avatar svg { width: 100px; height: 100px; max-width: 35%; }
+      #top-donors .donor-default-avatar span { font-size: 15px; font-weight: 800; }
+
+      #top-donors .donor-details,
+      #top-donors .donor-card-body {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        text-align: center !important;
+      }
+      #top-donors .donor-details h3,
+      #top-donors .donor-card-body h3 {
+        width: 100%;
+        text-align: center !important;
+        font-weight: 900 !important;
+      }
+      #top-donors .donation-amount,
+      #top-donors .donor-amount { font-weight: 900 !important; }
+
+      #donor-photo-lightbox {
+        position: fixed; inset: 0; z-index: 20000;
+        display: none; align-items: center; justify-content: center;
+        box-sizing: border-box; padding: 55px 18px 28px;
+        background: rgba(10,10,10,.93);
+      }
+      #donor-photo-lightbox.is-open { display: flex; }
+      #donor-photo-lightbox img {
+        display: block; max-width: min(100%, 1100px);
+        max-height: calc(100vh - 95px); width: auto; height: auto;
+        object-fit: contain; border-radius: 8px;
+      }
+      #donor-photo-lightbox .donor-lightbox-close {
+        position: absolute; top: 12px; right: 18px; width: 44px; height: 44px;
+        border: 0; border-radius: 50%; color: #fff;
+        background: rgba(255,255,255,.16); font-size: 32px; cursor: pointer;
+      }
+      #donor-photo-lightbox .donor-lightbox-hint {
+        position: absolute; bottom: 10px; left: 0; right: 0;
+        color: rgba(255,255,255,.8); font-size: 12px; text-align: center;
+      }
+      @media (max-width: 600px) {
+        #top-donors .donor-image-wrapper { height: 250px !important; min-height: 250px !important; }
+      }
+    </style>
+
+    <div id="donor-photo-lightbox" aria-hidden="true" role="dialog" aria-label="दानदाता की फोटो">
+      <button type="button" class="donor-lightbox-close" aria-label="फोटो बंद करें">&times;</button>
+      <img src="" alt="दानदाता की बड़ी फोटो" />
+      <span class="donor-lightbox-hint">बंद करने के लिए बाहर क्लिक करें या Esc दबाएँ</span>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const container = document.getElementById("top-donors");
+        const lightbox = document.getElementById("donor-photo-lightbox");
+        if (!container || !lightbox) return;
+
+        const preview = lightbox.querySelector("img");
+        const closeButton = lightbox.querySelector(".donor-lightbox-close");
+        const avatar = `
+          <div class="donor-default-avatar" aria-label="फोटो उपलब्ध नहीं">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle cx="60" cy="60" r="57" fill="#fed7aa" />
+              <circle cx="60" cy="43" r="21" fill="#c2410c" />
+              <path d="M20 103c4-22 19-34 40-34s36 12 40 34" fill="#c2410c" />
+            </svg>
+            <span>दानदाता</span>
+          </div>`;
+
+        function photoAreaFor(img) {
+          return img.closest(".donor-image-wrapper") || img.closest(".donor-card") || img.parentElement;
+        }
+
+        function showFallback(area) {
+          if (!area || area.dataset.fallbackShown === "1") return;
+          area.dataset.fallbackShown = "1";
+          area.classList.add("donor-image-wrapper");
+          area.innerHTML = avatar;
+          // Keep fallback confined to the image region, never replace donor details/card.
+        }
+
+        function prepareImages() {
+          container.querySelectorAll("img").forEach(function (img) {
+            if (img.dataset.donorPrepared === "1") return;
+            const src = (img.currentSrc || img.getAttribute("src") || "").trim();
+            if (!src || src.startsWith("data:image/svg+xml")) {
+              showFallback(photoAreaFor(img));
+              return;
+            }
+            const area = photoAreaFor(img);
+            if (area) {
+              area.classList.add("donor-image-wrapper");
+              area.style.setProperty("--donor-photo-bg", 'url("' + src.replace(/"/g, '%22') + '")');
+            }
+            img.classList.add("donor-image");
+            img.style.objectFit = "contain";
+            img.style.objectPosition = "center center";
+            img.loading = "lazy";
+            img.decoding = "async";
+            img.dataset.donorPrepared = "1";
+            img.addEventListener("error", function () { showFallback(photoAreaFor(img)); }, { once: true });
+          });
+
+          // Replace legacy oversized text placeholder without touching name/message/amount.
+          container.querySelectorAll(".donor-image-placeholder").forEach(function (placeholder) {
+            const area = placeholder.closest(".donor-image-wrapper") || placeholder;
+            showFallback(area);
+          });
+
+          // Cards that contain no photo or placeholder get an avatar area inserted at the top.
+          container.querySelectorAll(".donor-card").forEach(function (card) {
+            const hasPhotoArea = card.querySelector(".donor-image-wrapper, img.donor-image, .donor-default-avatar");
+            if (!hasPhotoArea) {
+              const area = document.createElement("div");
+              area.className = "donor-image-wrapper";
+              area.innerHTML = avatar;
+              card.insertBefore(area, card.firstChild);
+            }
+          });
+        }
+
+        function openPreview(src, alt) {
+          if (!src) return;
+          preview.src = src;
+          preview.alt = alt || "दानदाता की फोटो";
+          lightbox.classList.add("is-open");
+          lightbox.setAttribute("aria-hidden", "false");
+          document.body.style.overflow = "hidden";
+          closeButton.focus();
+        }
+        function closePreview() {
+          lightbox.classList.remove("is-open");
+          lightbox.setAttribute("aria-hidden", "true");
+          preview.removeAttribute("src");
+          document.body.style.overflow = "";
+        }
+
+        container.addEventListener("click", function (event) {
+          const img = event.target.closest("img");
+          if (!img || !container.contains(img) || !img.src || img.dataset.donorImageFailed === "1") return;
+          openPreview(img.currentSrc || img.src, img.alt);
+        });
+        closeButton.addEventListener("click", closePreview);
+        lightbox.addEventListener("click", function (event) { if (event.target === lightbox) closePreview(); });
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape" && lightbox.classList.contains("is-open")) closePreview();
+        });
+
+        const observer = new MutationObserver(prepareImages);
+        observer.observe(container, { childList: true, subtree: true, attributes: true, attributeFilter: ["src"] });
+        prepareImages();
+        setTimeout(prepareImages, 400);
+        setTimeout(prepareImages, 1400);
+      })();
+    </script>
+
   </body>
 </html>
