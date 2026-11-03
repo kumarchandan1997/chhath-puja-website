@@ -1,982 +1,574 @@
-(function () {
-    "use strict";
+(() => {
+  "use strict";
 
-    // ==================================================
-    // CONFIGURATION
-    // ==================================================
+  const TABLE = "chanda_records";
+  const BUCKET = window.STORAGE_BUCKET || "donor-images";
+  const SESSION_KEY = "chhath_admin_mobile";
+  const PAGE_SIZE = 10;
+  const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+  const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
-    const TABLE_NAME = "chanda_records";
-    const STORAGE_BUCKET = window.STORAGE_BUCKET || "donor-images";
-    const RECORDS_PER_PAGE = 10;
-    const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+  const $ = (id) => document.getElementById(id);
+  const list = $("donation-list");
+  const form = $("donation-form");
+  const modal = $("donation-modal");
+  const formMessage = $("donation-form-message");
+  const saveButton = $("save-donation");
+  const galleryInput = $("donor-gallery-image");
+  const cameraInput = $("donor-camera-image");
+  const imageInput = $("donor-image");
+  const previewBox = $("donor-photo-preview");
+  const previewImage = $("donor-photo-preview-image");
+  const previewName = $("donor-photo-file-name");
+  const previewSize = $("donor-photo-file-size");
 
-    // ==================================================
-    // SUPABASE CONNECTION
-    // ==================================================
+  let db = null;
+  let records = [];
+  let page = 1;
+  let search = "";
+  let editingId = null;
+  let currentImageUrl = null;
+  let removeCurrentImage = false;
+  let previewUrl = null;
+  let busy = false;
 
-    let db = null;
+  if (
+    window.supabase?.createClient &&
+    window.SUPABASE_URL &&
+    window.SUPABASE_ANON_KEY
+  ) {
+    db = window.supabase.createClient(
+      window.SUPABASE_URL,
+      window.SUPABASE_ANON_KEY,
+    );
+  }
 
+  const esc = (v) =>
+    String(v ?? "").replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[c],
+    );
+  const money = (v) =>
+    new Intl.NumberFormat("hi-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 2,
+    }).format(Number(v) || 0);
+  const date = (v) => {
+    if (!v) return "तारीख उपलब्ध नहीं";
+    const d = new Date(v);
+    return Number.isNaN(d.getTime())
+      ? "तारीख उपलब्ध नहीं"
+      : d.toLocaleDateString("hi-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        });
+  };
+  const isAdmin = () => Boolean(sessionStorage.getItem(SESSION_KEY));
+
+  function toast(message, error = false) {
+    let el = $("toast");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "toast";
+      el.className = "toast";
+      document.body.appendChild(el);
+    }
+    el.textContent = message;
+    el.classList.toggle("error", error);
+    el.classList.add("show");
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => el.classList.remove("show"), 3500);
+  }
+
+  function message(text, type = "success") {
+    if (!formMessage) return;
+    formMessage.textContent = text;
+    formMessage.className =
+      type === "error" ? "donation-error" : "donation-success";
+    formMessage.style.display = "block";
+  }
+  function clearMessage() {
+    if (formMessage) {
+      formMessage.textContent = "";
+      formMessage.className = "";
+      formMessage.style.display = "none";
+    }
+  }
+
+  function setAdminControls() {
+    const loggedIn = isAdmin();
+    const add = $("open-donation-modal");
+    if (add) add.style.display = loggedIn ? "inline-flex" : "none";
+    document
+      .querySelectorAll(".donation-edit-button")
+      .forEach((btn) => (btn.hidden = !loggedIn));
+  }
+
+  function resetPhoto() {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = null;
+    if (imageInput) imageInput.value = "";
+    if (galleryInput) galleryInput.value = "";
+    if (cameraInput) cameraInput.value = "";
+    if (previewImage) previewImage.removeAttribute("src");
+    if (previewBox) previewBox.hidden = true;
+    if (previewName) previewName.textContent = "";
+    if (previewSize) previewSize.textContent = "";
+  }
+
+  function selectPhoto(file) {
+    if (!file) return;
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      message("JPG, PNG, WEBP या GIF फोटो चुनें।", "error");
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      message("फोटो 5 MB से कम होनी चाहिए।", "error");
+      return;
+    }
+    try {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      imageInput.files = dt.files;
+    } catch {
+      message("फोटो चुनने में समस्या हुई। दोबारा प्रयास करें।", "error");
+      return;
+    }
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(file);
+    previewImage.src = previewUrl;
+    previewName.textContent = file.name || "चुनी गई फोटो";
+    previewSize.textContent = (file.size / 1048576).toFixed(2) + " MB";
+    previewBox.hidden = false;
+    removeCurrentImage = false;
+    clearMessage();
+  }
+  galleryInput?.addEventListener("change", () =>
+    selectPhoto(galleryInput.files?.[0]),
+  );
+  cameraInput?.addEventListener("change", () =>
+    selectPhoto(cameraInput.files?.[0]),
+  );
+  $("remove-donor-photo")?.addEventListener("click", () => {
+    resetPhoto();
+    if (editingId && currentImageUrl) {
+      removeCurrentImage = true;
+      message("पुरानी फोटो हटाने के लिए Update सेव करें।");
+    } else clearMessage();
+  });
+
+  async function uploadPhoto(file) {
+    if (!db) throw new Error("Supabase कनेक्शन उपलब्ध नहीं है।");
+    if (!ALLOWED_TYPES.includes(file.type) || file.size > MAX_IMAGE_SIZE)
+      throw new Error("कृपया 5 MB से कम JPG, PNG, WEBP या GIF फोटो चुनें।");
+    const ext = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+      "image/gif": "gif",
+    }[file.type];
+    const key = `chanda/${Date.now()}-${crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await db.storage
+      .from(BUCKET)
+      .upload(key, file, {
+        upsert: false,
+        contentType: file.type,
+        cacheControl: "3600",
+      });
+    if (error) throw error;
+    return db.storage.from(BUCKET).getPublicUrl(key).data.publicUrl;
+  }
+
+  function openModal(record = null) {
+    if (!isAdmin()) {
+      toast("यह सुविधा केवल Admin के लिए है।", true);
+      return;
+    }
+    editingId = record ? record.id : null;
+    currentImageUrl = record?.image_url || null;
+    removeCurrentImage = false;
+    form.reset();
+    resetPhoto();
+    clearMessage();
+    $("donation-modal-title").textContent = record
+      ? "✏️ चंदा विवरण संपादित करें"
+      : "➕ नया चंदा जोड़ें";
+    saveButton.textContent = record ? "बदलाव सेव करें" : "चंदा सेव करें";
+    if (record) {
+      form.elements.namedItem("name").value = record.name || "";
+      form.elements.namedItem("mobile").value = record.mobile || "";
+      form.elements.namedItem("address").value = record.address || "";
+      form.elements.namedItem("amount").value = record.amount ?? "";
+      form.elements.namedItem("remarks").value = record.remarks || "";
+      if (record.image_url) {
+        previewImage.src = record.image_url;
+        previewName.textContent = "मौजूदा फोटो";
+        previewSize.textContent = "नई फोटो चुनने पर पुरानी फोटो बदल जाएगी";
+        previewBox.hidden = false;
+      }
+    }
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    setTimeout(() => form.elements.namedItem("name")?.focus(), 60);
+  }
+  function closeModal() {
+    if (busy) return;
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    form.reset();
+    resetPhoto();
+    clearMessage();
+    editingId = null;
+    currentImageUrl = null;
+    removeCurrentImage = false;
+    $("donation-modal-title").textContent = "➕ नया चंदा जोड़ें";
+    saveButton.textContent = "चंदा सेव करें";
+  }
+  $("open-donation-modal")?.addEventListener("click", () => openModal());
+  $("close-donation-modal")?.addEventListener("click", closeModal);
+  $("cancel-donation")?.addEventListener("click", closeModal);
+  modal?.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeModal();
+      closeViewer();
+    }
+  });
+
+  function profilePlaceholder(name) {
+    const initial = esc(
+      (
+        String(name || "दाता")
+          .trim()
+          .charAt(0) || "द"
+      ).toUpperCase(),
+    );
+    return `<div class="donation-image-placeholder" aria-label="डिफॉल्ट प्रोफाइल फोटो"><span>${initial}</span><small>दानदाता</small></div>`;
+  }
+
+  function imageMarkup(record) {
+    if (!record.image_url) return profilePlaceholder(record.name);
+    return `<button type="button" class="donation-image-button" data-view-image="${esc(record.id)}" aria-label="${esc(record.name)} की फोटो बड़ी देखें"><img class="donation-image" src="${esc(record.image_url)}" alt="${esc(record.name)} की फोटो" loading="lazy"></button>`;
+  }
+
+  function render() {
+    if (!list) return;
+    const q = search.toLowerCase();
+    const filtered = records.filter(
+      (r) =>
+        !q ||
+        [r.name, r.mobile, r.address, r.remarks, r.amount].some((v) =>
+          String(v ?? "")
+            .toLowerCase()
+            .includes(q),
+        ),
+    );
+    const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    page = Math.min(page, pages);
+    const start = (page - 1) * PAGE_SIZE;
+    const visible = filtered.slice(start, start + PAGE_SIZE);
+    $("donation-summary").textContent =
+      `कुल ${filtered.length} रिकॉर्ड • पृष्ठ ${page}/${pages}`;
+    if (!visible.length) {
+      list.innerHTML = `<div class="donation-empty"><h3>कोई रिकॉर्ड नहीं मिला</h3><p>${q ? "दूसरे नाम या शब्द से खोजें।" : "अभी कोई चंदा दर्ज नहीं है।"}</p></div>`;
+      $("donation-pagination").innerHTML = "";
+      return;
+    }
+    list.innerHTML = visible
+      .map(
+        (r, i) => `
+      <article class="donation-card">
+        <div class="donation-photo-frame">${imageMarkup(r)}</div>
+        <div class="donation-card-body">
+          <div class="donation-card-top"><h3>${esc(r.name)}</h3><span class="donation-rank">${start + i === 0 ? "🏆 " : ""}#${start + i + 1}</span></div>
+          <div class="donation-amount">${money(r.amount)}</div>
+          <p class="donation-info">📍 ${esc(r.address || "पता उपलब्ध नहीं")}</p>
+          <p class="donation-info">📅 ${date(r.created_at)}</p>
+          <div id="donation-details-${esc(r.id)}" class="donation-details">
+            <p class="donation-info"><strong>मोबाइल:</strong> ${esc(r.mobile || "उपलब्ध नहीं")}</p>
+            <p class="donation-info"><strong>टिप्पणी:</strong> ${esc(r.remarks || "कोई टिप्पणी नहीं")}</p>
+          </div>
+          <div class="donation-card-actions">
+            <button type="button" class="btn btn-secondary donation-more" data-details-id="${esc(r.id)}" aria-expanded="false">अधिक जानकारी देखें</button>
+            <button type="button" class="btn btn-primary donation-edit-button" data-edit-id="${esc(r.id)}" ${isAdmin() ? "" : "hidden"}>✏️ Edit</button>
+          </div>
+        </div>
+      </article>`,
+      )
+      .join("");
+    renderPagination(filtered.length, pages);
+    setAdminControls();
+  }
+
+  function renderPagination(total, pages) {
+    const el = $("donation-pagination");
+    if (!el) return;
+    el.innerHTML = "";
+    if (total <= PAGE_SIZE) return;
+    const add = (label, p, disabled, active = false) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = label;
+      b.disabled = disabled;
+      if (active) b.classList.add("active");
+      b.addEventListener("click", () => {
+        page = p;
+        render();
+        list.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      el.appendChild(b);
+    };
+    add("← पिछला", page, page === 1);
+    for (let p = 1; p <= pages; p++) add(String(p), p, false, p === page);
+    add("अगला →", page + 1, page === pages);
+  }
+
+  async function load() {
+    if (!db) {
+      list.innerHTML = `<div class="donation-empty"><h3>Supabase कनेक्शन उपलब्ध नहीं</h3><p>assets/js/config.js जाँचें।</p></div>`;
+      return;
+    }
+    list.innerHTML = `<div class="donation-loading">चंदा सूची लोड हो रही है...</div>`;
+    try {
+      const { data, error } = await db
+        .from(TABLE)
+        .select("id,name,mobile,address,amount,remarks,image_url,created_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      records = (data || []).sort(
+        (a, b) => Number(b.amount || 0) - Number(a.amount || 0),
+      );
+      $("total-donors").textContent = records.length;
+      $("total-donation").textContent = money(
+        records.reduce((s, r) => s + Number(r.amount || 0), 0),
+      );
+      $("highest-donation").textContent = money(
+        records.length
+          ? Math.max(...records.map((r) => Number(r.amount || 0)))
+          : 0,
+      );
+      render();
+    } catch (e) {
+      console.error(e);
+      list.innerHTML = `<div class="donation-empty"><h3>रिकॉर्ड लोड नहीं हो सके</h3><p>${esc(e.message || "कृपया दोबारा प्रयास करें।")}</p><button id="retry-load" class="btn btn-primary">Retry</button></div>`;
+      $("retry-load")?.addEventListener("click", load);
+    }
+  }
+
+  list?.addEventListener("click", (e) => {
+    const more = e.target.closest("[data-details-id]");
+    if (more) {
+      const box = $("donation-details-" + more.dataset.detailsId);
+      const open = box?.classList.toggle("open");
+      more.setAttribute("aria-expanded", String(!!open));
+      more.textContent = open ? "कम जानकारी दिखाएँ" : "अधिक जानकारी देखें";
+      return;
+    }
+    const edit = e.target.closest("[data-edit-id]");
+    if (edit) {
+      if (!isAdmin()) {
+        toast("कृपया Admin Login करें।", true);
+        return;
+      }
+      const row = records.find(
+        (r) => String(r.id) === String(edit.dataset.editId),
+      );
+      if (row) openModal(row);
+      return;
+    }
+    const image = e.target.closest("[data-view-image]");
+    if (image) {
+      const row = records.find(
+        (r) => String(r.id) === String(image.dataset.viewImage),
+      );
+      if (row?.image_url) showViewer(row.image_url, row.name);
+    }
+  });
+
+  function showViewer(src, alt) {
+    let viewer = $("donation-image-viewer");
+    if (!viewer) {
+      viewer = document.createElement("div");
+      viewer.id = "donation-image-viewer";
+      viewer.className = "donation-image-viewer";
+      viewer.innerHTML = `<button type="button" class="viewer-close" aria-label="बंद करें">×</button><img alt="बड़ी फोटो">`;
+      document.body.appendChild(viewer);
+      viewer.addEventListener("click", (e) => {
+        if (e.target === viewer || e.target.closest(".viewer-close"))
+          closeViewer();
+      });
+    }
+    viewer.querySelector("img").src = src;
+    viewer.querySelector("img").alt = alt || "दानदाता की फोटो";
+    viewer.classList.add("show");
+    document.body.style.overflow = "hidden";
+  }
+  function closeViewer() {
+    const v = $("donation-image-viewer");
+    if (v) {
+      v.classList.remove("show");
+      document.body.style.overflow = modal?.classList.contains("open")
+        ? "hidden"
+        : "";
+    }
+  }
+
+  $("donation-search")?.addEventListener("input", (e) => {
+    search = e.target.value.trim();
+    page = 1;
+    render();
+  });
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (busy) return;
+    if (!isAdmin()) {
+      message("कृपया पहले Admin Login करें।", "error");
+      return;
+    }
+    if (!db) {
+      message("Supabase कनेक्शन उपलब्ध नहीं है।", "error");
+      return;
+    }
+    const fd = new FormData(form);
+    const payload = {
+      name: String(fd.get("name") || "").trim(),
+      mobile: String(fd.get("mobile") || "").trim() || null,
+      address: String(fd.get("address") || "").trim() || null,
+      amount: Number(fd.get("amount")),
+      remarks: String(fd.get("remarks") || "").trim() || null,
+    };
+    const file = imageInput?.files?.[0] || null;
+    if (!payload.name) {
+      message("दानदाता का नाम भरें।", "error");
+      return;
+    }
+    if (!Number.isFinite(payload.amount) || payload.amount < 1) {
+      message("राशि कम से कम ₹1 होनी चाहिए।", "error");
+      return;
+    }
     if (
-        window.supabase &&
-        typeof window.supabase.createClient === "function" &&
-        window.SUPABASE_URL &&
-        window.SUPABASE_ANON_KEY
+      file &&
+      (!ALLOWED_TYPES.includes(file.type) || file.size > MAX_IMAGE_SIZE)
     ) {
-        db = window.supabase.createClient(
-            window.SUPABASE_URL,
-            window.SUPABASE_ANON_KEY
-        );
+      message("मान्य फोटो चुनें (JPG/PNG/WEBP/GIF, अधिकतम 5 MB)।", "error");
+      return;
     }
+    busy = true;
+    saveButton.disabled = true;
+    saveButton.textContent = editingId
+      ? "अपडेट हो रहा है..."
+      : "सेव हो रहा है...";
+    try {
+      let imageUrl = currentImageUrl;
+      if (file) imageUrl = await uploadPhoto(file);
+      if (removeCurrentImage && !file) imageUrl = null;
+      payload.image_url = imageUrl;
+      // ==========================================
+      // UPDATE EXISTING DONATION OR INSERT NEW
+      // ==========================================
 
-    // ==================================================
-    // DOM ELEMENTS
-    // ==================================================
+      const isEditing = Boolean(editingId);
 
-    const donationList = document.getElementById("donation-list");
-    const donationSummary = document.getElementById("donation-summary");
-    const donationSearch = document.getElementById("donation-search");
-    const donationPagination = document.getElementById(
-        "donation-pagination"
-    );
+      if (isEditing) {
+        console.log("Updating donation ID:", editingId);
+        console.log("Update payload:", payload);
 
-    const donationModal = document.getElementById("donation-modal");
-    const donationForm = document.getElementById("donation-form");
+        const { data, error } = await db
+          .from(TABLE)
+          .update(payload)
+          .eq("id", editingId)
+          .select(
+            "id, name, mobile, address, amount, remarks, image_url, created_at",
+          )
+          .maybeSingle();
 
-    const openModalButton = document.getElementById(
-        "open-donation-modal"
-    );
+        // Supabase error
+        if (error) {
+          console.error("Supabase update error:", error);
+          throw error;
+        }
 
-    const closeModalButton = document.getElementById(
-        "close-donation-modal"
-    );
+        // No row was updated
+        if (!data) {
+          throw new Error(
+            "कोई रिकॉर्ड अपडेट नहीं हुआ। कृपया Supabase RLS UPDATE और SELECT permissions जाँचें।",
+          );
+        }
 
-    const cancelModalButton = document.getElementById(
-        "cancel-donation"
-    );
+        console.log("Updated record:", data);
 
-    const saveDonationButton = document.getElementById("save-donation");
+        toast("✅ दानदाता का विवरण सफलतापूर्वक अपडेट हो गया!");
+      } else {
+        const { data, error } = await db
+          .from(TABLE)
+          .insert([payload])
+          .select(
+            "id, name, mobile, address, amount, remarks, image_url, created_at",
+          )
+          .single();
 
-    const formMessage = document.getElementById(
-        "donation-form-message"
-    );
+        if (error) {
+          console.error("Supabase insert error:", error);
+          throw error;
+        }
 
-    const exportButton = document.getElementById("export-donations");
+        if (!data) {
+          throw new Error("नया रिकॉर्ड सेव नहीं हुआ।");
+        }
 
-    const totalDonorsElement = document.getElementById("total-donors");
-    const totalDonationElement = document.getElementById("total-donation");
-    const highestDonationElement = document.getElementById(
-        "highest-donation"
-    );
+        console.log("Inserted record:", data);
 
-    // ==================================================
-    // PHOTO INPUT ELEMENTS
-    // ==================================================
+        toast("🙏 नया चंदा सफलतापूर्वक सेव हो गया!");
+      }
 
-    const galleryInput = document.getElementById("donor-gallery-image");
-    const cameraInput = document.getElementById("donor-camera-image");
-    const imageInput = document.getElementById("donor-image");
+      // Close modal only after successful database operation
+      closeModal();
 
-    const imagePreview = document.getElementById("donor-image-preview");
-    const removeImageButton = document.getElementById("remove-donor-image");
-
-    // ==================================================
-    // STATE
-    // ==================================================
-
-    let allDonations = [];
-    let currentPage = 1;
-    let searchTerm = "";
-    let isSaving = false;
-    let previewObjectUrl = null;
-
-    // ==================================================
-    // HELPERS
-    // ==================================================
-
-    function escapeHTML(value) {
-        return String(value ?? "").replace(/[&<>"']/g, function (char) {
-            const entities = {
-                "&": "&amp;",
-                "<": "&lt;",
-                ">": "&gt;",
-                '"': "&quot;",
-                "'": "&#039;"
-            };
-
-            return entities[char];
-        });
+      // Reload latest data from Supabase
+      await load();
+    } catch (err) {
+      console.error(err);
+      message(
+        "सेव नहीं हो सका: " + (err.message || "कृपया दोबारा प्रयास करें।"),
+        "error",
+      );
+    } finally {
+      busy = false;
+      saveButton.disabled = false;
+      saveButton.textContent = editingId ? "बदलाव सेव करें" : "चंदा सेव करें";
     }
+  });
 
-    function formatCurrency(value) {
-        return new Intl.NumberFormat("hi-IN", {
-            style: "currency",
-            currency: "INR",
-            maximumFractionDigits: 2
-        }).format(Number(value) || 0);
-    }
-
-    function formatDate(value) {
-        if (!value) {
-            return "तारीख उपलब्ध नहीं";
-        }
-
-        const date = new Date(value);
-
-        if (Number.isNaN(date.getTime())) {
-            return "तारीख उपलब्ध नहीं";
-        }
-
-        return new Intl.DateTimeFormat("hi-IN", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric"
-        }).format(date);
-    }
-
-    function showToast(message) {
-        const toast = document.getElementById("toast");
-
-        if (!toast) {
-            alert(message);
-            return;
-        }
-
-        toast.textContent = message;
-        toast.classList.add("show");
-
-        clearTimeout(showToast.timer);
-
-        showToast.timer = setTimeout(function () {
-            toast.classList.remove("show");
-        }, 3500);
-    }
-
-    function showFormMessage(message, type) {
-        if (!formMessage) {
-            alert(message);
-            return;
-        }
-
-        formMessage.className = type === "error"
-            ? "donation-error"
-            : "donation-success";
-
-        formMessage.textContent = message;
-        formMessage.style.display = "block";
-    }
-
-    function clearFormMessage() {
-        if (!formMessage) return;
-
-        formMessage.textContent = "";
-        formMessage.className = "";
-        formMessage.style.display = "none";
-    }
-
-    function getErrorMessage(error) {
-        return error?.message || "कृपया दोबारा प्रयास करें।";
-    }
-
-    // ==================================================
-    // PHOTO PREVIEW
-    // ==================================================
-
-    function clearImagePreview() {
-        if (previewObjectUrl) {
-            URL.revokeObjectURL(previewObjectUrl);
-            previewObjectUrl = null;
-        }
-
-        if (imagePreview) {
-            imagePreview.innerHTML = "";
-            imagePreview.style.display = "none";
-        }
-
-        if (imageInput) {
-            imageInput.value = "";
-        }
-
-        if (galleryInput) {
-            galleryInput.value = "";
-        }
-
-        if (cameraInput) {
-            cameraInput.value = "";
-        }
-    }
-
-    function handleSelectedImage(file) {
-        if (!file) return;
-
-        if (!file.type.startsWith("image/")) {
-            showFormMessage("कृपया सही फोटो चुनें।", "error");
-            clearImagePreview();
-            return;
-        }
-
-        const allowedTypes = [
-            "image/jpeg",
-            "image/png",
-            "image/webp",
-            "image/gif"
-        ];
-
-        if (!allowedTypes.includes(file.type)) {
-            showFormMessage(
-                "केवल JPG, PNG, WEBP या GIF फोटो चुनें।",
-                "error"
-            );
-
-            clearImagePreview();
-            return;
-        }
-
-        if (file.size > MAX_IMAGE_SIZE) {
-            showFormMessage(
-                "फोटो का आकार 5 MB से कम होना चाहिए।",
-                "error"
-            );
-
-            clearImagePreview();
-            return;
-        }
-
-        // असली file को form में उपयोग होने वाले input में रखें।
-        const transfer = new DataTransfer();
-        transfer.items.add(file);
-
-        if (imageInput) {
-            imageInput.files = transfer.files;
-        }
-
-        // पिछला preview हटाएँ।
-        if (previewObjectUrl) {
-            URL.revokeObjectURL(previewObjectUrl);
-        }
-
-        previewObjectUrl = URL.createObjectURL(file);
-
-        if (imagePreview) {
-            imagePreview.innerHTML = "";
-
-            const img = document.createElement("img");
-            img.src = previewObjectUrl;
-            img.alt = "चंदा देने वाले की फोटो का preview";
-
-            img.style.maxWidth = "180px";
-            img.style.maxHeight = "180px";
-            img.style.objectFit = "cover";
-            img.style.borderRadius = "12px";
-
-            imagePreview.appendChild(img);
-            imagePreview.style.display = "block";
-        }
-
-        clearFormMessage();
-    }
-
-    if (galleryInput) {
-        galleryInput.addEventListener("change", function () {
-            const file = this.files?.[0];
-
-            if (file) {
-                handleSelectedImage(file);
-            }
-        });
-    }
-
-    if (cameraInput) {
-        cameraInput.addEventListener("change", function () {
-            const file = this.files?.[0];
-
-            if (file) {
-                handleSelectedImage(file);
-            }
-        });
-    }
-
-    if (removeImageButton) {
-        removeImageButton.addEventListener("click", function () {
-            clearImagePreview();
-            clearFormMessage();
-        });
-    }
-
-    // ==================================================
-    // MODAL
-    // ==================================================
-
-    function openModal() {
-        if (!donationModal) return;
-
-        clearFormMessage();
-
-        donationModal.classList.add("open");
-        donationModal.setAttribute("aria-hidden", "false");
-
-        document.body.style.overflow = "hidden";
-
-        const nameInput = donationForm?.elements.namedItem("name");
-
-        setTimeout(function () {
-            nameInput?.focus();
-        }, 100);
-    }
-
-    function closeModal() {
-        if (isSaving || !donationModal) return;
-
-        donationModal.classList.remove("open");
-        donationModal.setAttribute("aria-hidden", "true");
-
-        document.body.style.overflow = "";
-
-        donationForm?.reset();
-        clearImagePreview();
-        clearFormMessage();
-    }
-
-    openModalButton?.addEventListener("click", openModal);
-    closeModalButton?.addEventListener("click", closeModal);
-    cancelModalButton?.addEventListener("click", closeModal);
-
-    donationModal?.addEventListener("click", function (event) {
-        if (event.target === donationModal) {
-            closeModal();
-        }
+  $("export-donations")?.addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(records, null, 2)], {
+      type: "application/json;charset=utf-8",
     });
-
-    document.addEventListener("keydown", function (event) {
-        if (
-            event.key === "Escape" &&
-            donationModal?.classList.contains("open")
-        ) {
-            closeModal();
-        }
-    });
-
-    // ==================================================
-    // UPLOAD PHOTO TO SUPABASE STORAGE
-    // ==================================================
-
-    async function uploadDonationImage(file) {
-        if (!file) return null;
-
-        if (!db) {
-            throw new Error("Supabase कनेक्शन उपलब्ध नहीं है।");
-        }
-
-        if (!file.type.startsWith("image/")) {
-            throw new Error("कृपया केवल फोटो अपलोड करें।");
-        }
-
-        if (file.size > MAX_IMAGE_SIZE) {
-            throw new Error("फोटो का आकार 5 MB से कम होना चाहिए।");
-        }
-
-        const extensionMap = {
-            "image/jpeg": "jpg",
-            "image/png": "png",
-            "image/webp": "webp",
-            "image/gif": "gif"
-        };
-
-        const extension = extensionMap[file.type];
-
-        if (!extension) {
-            throw new Error("यह फोटो फ़ॉर्मेट समर्थित नहीं है।");
-        }
-
-        const uniqueId = window.crypto?.randomUUID
-            ? window.crypto.randomUUID()
-            : Date.now() + "-" + Math.random().toString(36).slice(2);
-
-        const filePath = "chanda/" + uniqueId + "." + extension;
-
-        const { error: uploadError } = await db
-            .storage
-            .from(STORAGE_BUCKET)
-            .upload(filePath, file, {
-                cacheControl: "3600",
-                upsert: false,
-                contentType: file.type
-            });
-
-        if (uploadError) {
-            throw uploadError;
-        }
-
-        const { data } = db
-            .storage
-            .from(STORAGE_BUCKET)
-            .getPublicUrl(filePath);
-
-        return data.publicUrl;
-    }
-
-    // ==================================================
-    // LOAD DONATIONS FROM SUPABASE
-    // ==================================================
-
-    async function fetchDonations() {
-        if (!donationList) return;
-
-        if (!db) {
-            donationList.innerHTML = `
-                <div class="donation-empty">
-                    <h3>Supabase कनेक्शन सेट नहीं है</h3>
-                    <p>अपनी config.js फ़ाइल जाँचें।</p>
-                </div>
-            `;
-
-            if (donationSummary) {
-                donationSummary.textContent =
-                    "Supabase कनेक्शन उपलब्ध नहीं है।";
-            }
-
-            return;
-        }
-
-        donationList.innerHTML = `
-            <div class="donation-loading">
-                चंदा सूची लोड हो रही है...
-            </div>
-        `;
-
-        try {
-            const { data, error } = await db
-                .from(TABLE_NAME)
-                .select(
-                    "id, name, mobile, address, amount, remarks, image_url, created_at"
-                )
-                .order("created_at", { ascending: false });
-
-            if (error) throw error;
-
-            allDonations = (data || []).sort(function (a, b) {
-                return Number(b.amount || 0) - Number(a.amount || 0);
-            });
-
-            currentPage = 1;
-
-            updateSummary();
-            renderDonations();
-
-        } catch (error) {
-            console.error("Donation loading error:", error);
-
-            donationList.innerHTML = `
-                <div class="donation-empty">
-                    <h3>रिकॉर्ड लोड नहीं हो सके</h3>
-                    <p>${escapeHTML(getErrorMessage(error))}</p>
-                    <button
-                        type="button"
-                        id="retry-donation-load"
-                        class="btn btn-primary">
-                        दोबारा प्रयास करें
-                    </button>
-                </div>
-            `;
-
-            document.getElementById("retry-donation-load")
-                ?.addEventListener("click", fetchDonations);
-        }
-    }
-
-    // ==================================================
-    // SUMMARY
-    // ==================================================
-
-    function updateSummary() {
-        const totalAmount = allDonations.reduce(function (sum, record) {
-            return sum + Number(record.amount || 0);
-        }, 0);
-
-        const highestAmount = allDonations.length
-            ? Math.max(
-                ...allDonations.map(record => Number(record.amount || 0))
-            )
-            : 0;
-
-        if (totalDonorsElement) {
-            totalDonorsElement.textContent = allDonations.length;
-        }
-
-        if (totalDonationElement) {
-            totalDonationElement.textContent = formatCurrency(totalAmount);
-        }
-
-        if (highestDonationElement) {
-            highestDonationElement.textContent = formatCurrency(highestAmount);
-        }
-    }
-
-    // ==================================================
-    // SEARCH
-    // ==================================================
-
-    function getFilteredDonations() {
-        if (!searchTerm) return allDonations;
-
-        const query = searchTerm.toLowerCase();
-
-        return allDonations.filter(function (record) {
-            return [
-                record.name,
-                record.mobile,
-                record.address,
-                record.remarks,
-                record.amount
-            ].some(function (value) {
-                return String(value ?? "").toLowerCase().includes(query);
-            });
-        });
-    }
-
-    donationSearch?.addEventListener("input", function () {
-        searchTerm = this.value.trim();
-        currentPage = 1;
-        renderDonations();
-    });
-
-    // ==================================================
-    // RENDER DONATION CARDS
-    // ==================================================
-
-    function renderDonations() {
-        if (!donationList) return;
-
-        const filtered = getFilteredDonations();
-
-        const totalPages = Math.max(
-            1,
-            Math.ceil(filtered.length / RECORDS_PER_PAGE)
-        );
-
-        currentPage = Math.min(currentPage, totalPages);
-
-        const startIndex = (currentPage - 1) * RECORDS_PER_PAGE;
-
-        const visibleRecords = filtered.slice(
-            startIndex,
-            startIndex + RECORDS_PER_PAGE
-        );
-
-        if (donationSummary) {
-            donationSummary.textContent =
-                `कुल ${filtered.length} रिकॉर्ड • पृष्ठ ${currentPage}/${totalPages}`;
-        }
-
-        if (filtered.length === 0) {
-            donationList.innerHTML = `
-                <div class="donation-empty">
-                    <h3>कोई रिकॉर्ड नहीं मिला</h3>
-                    <p>
-                        ${searchTerm
-                            ? "दूसरे नाम या शब्द से खोजें।"
-                            : "पहला चंदा जोड़ने के लिए बटन पर क्लिक करें।"}
-                    </p>
-                </div>
-            `;
-
-            if (donationPagination) {
-                donationPagination.innerHTML = "";
-            }
-
-            return;
-        }
-
-        donationList.innerHTML = visibleRecords.map(function (record, index) {
-            const rank = startIndex + index + 1;
-
-            const imageHTML = record.image_url
-                ? `
-                    <img
-                        class="donation-image"
-                        src="${escapeHTML(record.image_url)}"
-                        alt="${escapeHTML(record.name)} की फोटो"
-                        loading="lazy"
-                        onerror="this.style.display='none'">
-                  `
-                : `
-                    <div class="donation-image-placeholder">🙏</div>
-                  `;
-
-            return `
-                <article class="donation-card">
-                    ${imageHTML}
-
-                    <div class="donation-card-body">
-                        <div class="donation-card-top">
-                            <h3>${escapeHTML(record.name)}</h3>
-                            <span class="donation-rank">
-                                ${rank === 1 ? "🏆 " : ""}#${rank}
-                            </span>
-                        </div>
-
-                        <div class="donation-amount">
-                            ${formatCurrency(record.amount)}
-                        </div>
-
-                        <p class="donation-info">
-                            📍 ${escapeHTML(record.address || "पता उपलब्ध नहीं")}
-                        </p>
-
-                        <p class="donation-info">
-                            📅 ${formatDate(record.created_at)}
-                        </p>
-
-                        <div
-                            id="donation-details-${escapeHTML(record.id)}"
-                            class="donation-details">
-
-                            <p class="donation-info">
-                                <strong>मोबाइल:</strong>
-                                ${escapeHTML(record.mobile || "उपलब्ध नहीं")}
-                            </p>
-
-                            <p class="donation-info">
-                                <strong>टिप्पणी:</strong>
-                                ${escapeHTML(record.remarks || "कोई टिप्पणी नहीं")}
-                            </p>
-                        </div>
-
-                        <button
-                            type="button"
-                            class="btn btn-secondary donation-more"
-                            data-details-id="${escapeHTML(record.id)}"
-                            aria-expanded="false">
-                            अधिक जानकारी देखें
-                        </button>
-                    </div>
-                </article>
-            `;
-        }).join("");
-
-        renderPagination(filtered.length, totalPages);
-    }
-
-    // ==================================================
-    // SHOW / HIDE DETAILS
-    // ==================================================
-
-    donationList?.addEventListener("click", function (event) {
-        const button = event.target.closest("[data-details-id]");
-
-        if (!button) return;
-
-        const recordId = button.dataset.detailsId;
-
-        const details = document.getElementById(
-            "donation-details-" + recordId
-        );
-
-        if (!details) return;
-
-        const isOpen = details.classList.toggle("open");
-
-        button.setAttribute("aria-expanded", String(isOpen));
-
-        button.textContent = isOpen
-            ? "कम जानकारी दिखाएँ"
-            : "अधिक जानकारी देखें";
-    });
-
-    // ==================================================
-    // PAGINATION
-    // ==================================================
-
-    function renderPagination(totalRecords, totalPages) {
-        if (!donationPagination) return;
-
-        donationPagination.innerHTML = "";
-
-        if (totalRecords <= RECORDS_PER_PAGE) return;
-
-        function addButton(label, page, disabled, active) {
-            const button = document.createElement("button");
-
-            button.type = "button";
-            button.textContent = label;
-            button.disabled = disabled;
-
-            if (active) {
-                button.classList.add("active");
-                button.setAttribute("aria-current", "page");
-            }
-
-            button.addEventListener("click", function () {
-                currentPage = page;
-                renderDonations();
-
-                donationList?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start"
-                });
-            });
-
-            donationPagination.appendChild(button);
-        }
-
-        addButton("← पिछला", currentPage - 1, currentPage === 1, false);
-
-        for (let page = 1; page <= totalPages; page++) {
-            addButton(String(page), page, false, page === currentPage);
-        }
-
-        addButton(
-            "अगला →",
-            currentPage + 1,
-            currentPage === totalPages,
-            false
-        );
-    }
-
-    // ==================================================
-    // SAVE DONATION
-    // ==================================================
-
-    donationForm?.addEventListener("submit", async function (event) {
-        event.preventDefault();
-
-        if (isSaving) return;
-
-        if (!db) {
-            showFormMessage(
-                "Supabase कनेक्शन उपलब्ध नहीं है। config.js जाँचें।",
-                "error"
-            );
-            return;
-        }
-
-        const formData = new FormData(donationForm);
-
-        const name = String(formData.get("name") || "").trim();
-        const mobile = String(formData.get("mobile") || "").trim();
-        const address = String(formData.get("address") || "").trim();
-        const remarks = String(formData.get("remarks") || "").trim();
-        const amount = Number(formData.get("amount"));
-
-        // Photo input का name="image" होना आवश्यक है।
-        const imageFile = imageInput?.files?.[0] || null;
-
-        if (!name) {
-            showFormMessage("कृपया दानदाता का नाम भरें।", "error");
-            return;
-        }
-
-        if (!Number.isFinite(amount) || amount < 1) {
-            showFormMessage("चंदा राशि कम से कम ₹1 होनी चाहिए।", "error");
-            return;
-        }
-
-        if (imageFile && imageFile.size > MAX_IMAGE_SIZE) {
-            showFormMessage("फोटो का आकार 5 MB से कम होना चाहिए।", "error");
-            return;
-        }
-
-        isSaving = true;
-
-        if (saveDonationButton) {
-            saveDonationButton.disabled = true;
-            saveDonationButton.textContent = "सेव हो रहा है...";
-        }
-
-        try {
-            let imageUrl = null;
-
-            if (imageFile) {
-                showFormMessage("फोटो अपलोड हो रही है...", "success");
-                imageUrl = await uploadDonationImage(imageFile);
-            }
-
-            const newRecord = {
-                name: name,
-                mobile: mobile || null,
-                address: address || null,
-                amount: amount,
-                remarks: remarks || null,
-                image_url: imageUrl
-            };
-
-            const { data, error } = await db
-                .from(TABLE_NAME)
-                .insert([newRecord])
-                .select(
-                    "id, name, mobile, address, amount, remarks, image_url, created_at"
-                )
-                .single();
-
-            if (error) throw error;
-
-            allDonations.push(data);
-
-            allDonations.sort(function (a, b) {
-                return Number(b.amount || 0) - Number(a.amount || 0);
-            });
-
-            searchTerm = "";
-
-            if (donationSearch) {
-                donationSearch.value = "";
-            }
-
-            currentPage = 1;
-
-            updateSummary();
-            renderDonations();
-
-            donationForm.reset();
-            clearImagePreview();
-
-            donationModal?.classList.remove("open");
-            donationModal?.setAttribute("aria-hidden", "true");
-
-            document.body.style.overflow = "";
-
-            clearFormMessage();
-
-            showToast("🙏 चंदा सफलतापूर्वक सेव हो गया!");
-
-            await fetchDonations();
-
-        } catch (error) {
-            console.error("Donation save error:", error);
-
-            showFormMessage(
-                "चंदा सेव नहीं हो सका: " + getErrorMessage(error),
-                "error"
-            );
-
-        } finally {
-            isSaving = false;
-
-            if (saveDonationButton) {
-                saveDonationButton.disabled = false;
-                saveDonationButton.textContent = "चंदा सेव करें";
-            }
-        }
-    });
-
-    // ==================================================
-    // EXPORT DONATIONS AS JSON
-    // ==================================================
-
-    exportButton?.addEventListener("click", function () {
-        const exportData = allDonations.map(function (record) {
-            return {
-                id: record.id,
-                name: record.name,
-                mobile: record.mobile,
-                address: record.address,
-                amount: Number(record.amount || 0),
-                remarks: record.remarks,
-                image_url: record.image_url,
-                created_at: record.created_at
-            };
-        });
-
-        const blob = new Blob(
-            [JSON.stringify(exportData, null, 2)],
-            { type: "application/json;charset=utf-8" }
-        );
-
-        const downloadUrl = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-
-        link.href = downloadUrl;
-        link.download = "chanda-records.json";
-
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-
-        URL.revokeObjectURL(downloadUrl);
-
-        showToast("चंदा सूची JSON फ़ाइल डाउनलोड हो गई।");
-    });
-
-    // ==================================================
-    // ADMIN SESSION + ADD DONATION BUTTON
-    // ==================================================
-
-    const ADMIN_SESSION_KEY = "chhath_admin_mobile";
-
-    function setDonationButtonVisible(isLoggedIn) {
-        if (!openModalButton) return;
-
-        openModalButton.hidden = !isLoggedIn;
-        openModalButton.style.setProperty(
-            "display",
-            isLoggedIn ? "inline-flex" : "none",
-            "important"
-        );
-        openModalButton.setAttribute("aria-hidden", isLoggedIn ? "false" : "true");
-    }
-
-    async function restoreAdminSession() {
-        const savedMobile = sessionStorage.getItem(ADMIN_SESSION_KEY);
-
-        if (!savedMobile || !db || typeof db.rpc !== "function") {
-            setDonationButtonVisible(false);
-            return;
-        }
-
-        try {
-            const { data, error } = await db.rpc(
-                "check_authorized_mobile",
-                { input_mobile: savedMobile }
-            );
-
-            if (error) throw error;
-
-            const authorized = data === true || data === "true" ||
-                (Array.isArray(data) && data.length > 0 && (
-                    data[0] === true ||
-                    data[0]?.check_authorized_mobile === true ||
-                    data[0]?.check_authorized_mobile === "true"
-                ));
-
-            if (authorized) {
-                setDonationButtonVisible(true);
-            } else {
-                sessionStorage.removeItem(ADMIN_SESSION_KEY);
-                setDonationButtonVisible(false);
-            }
-        } catch (error) {
-            console.error("Admin session verification failed:", error);
-            setDonationButtonVisible(false);
-        }
-    }
-
-    // Login/logout happens on this page or another page in the same tab.
-    window.addEventListener("chhath-admin-login-changed", function (event) {
-        if (event.detail?.loggedIn === false) {
-            sessionStorage.removeItem(ADMIN_SESSION_KEY);
-            setDonationButtonVisible(false);
-        } else if (event.detail?.loggedIn === true) {
-            restoreAdminSession();
-        }
-    });
-
-    // Hide immediately, then verify the saved session against Supabase.
-    setDonationButtonVisible(false);
-    restoreAdminSession();
-
-    // ==================================================
-    // INITIALIZE
-    // ==================================================
-
-    fetchDonations();
-
-    // Refresh list every 30 seconds.
-    setInterval(function () {
-        if (
-            document.visibilityState === "visible" &&
-            !isSaving
-        ) {
-            fetchDonations();
-        }
-    }, 30000);
-
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "chanda-records.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  window.addEventListener("chhath-admin-login-changed", setAdminControls);
+  window.addEventListener("storage", setAdminControls);
+  document.addEventListener("DOMContentLoaded", () => {
+    setAdminControls();
+    load();
+  });
 })();
